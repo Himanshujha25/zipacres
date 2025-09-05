@@ -68,7 +68,7 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("https://zipacres-v-1.onrender.com/api/auth/register", {
+      const res = await fetch("https://zipacres-v1.onrender.com/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, role }),
@@ -104,7 +104,7 @@ const handleGoogleSignup = useGoogleLogin({
 
       const profile = await userInfoRes.json();
 
-      const res = await fetch("https://zipacres-v-1.onrender.com/api/auth/google", {
+      const res = await fetch("https://zipacres-v1.onrender.com/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

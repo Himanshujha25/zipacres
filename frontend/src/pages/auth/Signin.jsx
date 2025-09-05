@@ -48,7 +48,7 @@ export default function Signin() {
 
     setIsLoading(true);
     try {
-      const res = await fetch("https://zipacres-v-1.onrender.com/api/auth/login", {
+      const res = await fetch("https://zipacres-v1.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -77,7 +77,7 @@ export default function Signin() {
   try {
     const tokenId = credentialResponse.credential; // Google ID token
 
-    const res = await fetch("https://zipacres-v-1.onrender.com/api/auth/google", {
+    const res = await fetch("https://zipacres-v1.onrender.com/api/auth/google", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tokenId }),
