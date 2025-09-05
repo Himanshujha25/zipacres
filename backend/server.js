@@ -13,10 +13,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ✅ CORS setup
 app.use(cors({
-  origin: "http://localhost:5173" || "https://zipacres.vercel.app/", // frontend URL
+  origin: "https://zipacres.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  credentials: true,
+  credentials: true
 }));
+
 
 // Import Routes
 const propertyRoutes = require("./routes/property");
