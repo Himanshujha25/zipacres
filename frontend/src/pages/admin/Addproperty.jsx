@@ -68,7 +68,7 @@ const submit = async (e) => {
   }
 
   try {
-    const res = await fetch("https://zipacres-v-1.onrender.com/api/properties", {
+    const res = await fetch("http://zipacres.onrender.com/api/properties", {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",

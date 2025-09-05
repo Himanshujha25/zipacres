@@ -104,7 +104,7 @@ const handleGoogleSignup = useGoogleLogin({
 
       const profile = await userInfoRes.json();
 
-      const res = await fetch("https://zipacres-v1.onrender.com/api/auth/google", {
+      const res = await fetch("http://zipacres.onrender.com/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
