@@ -22,7 +22,7 @@ export const PropertyProvider = ({ children }) => {
 
       try {
         setLoading(true);
-        const res = await fetch("http://zipacres.onrender.com/api/properties", {
+        const res = await fetch("https://zipacres.onrender.com/api/properties", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
