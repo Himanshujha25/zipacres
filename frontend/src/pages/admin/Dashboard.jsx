@@ -36,7 +36,7 @@ export default function Dashboard() {
     if (!window.confirm(`Delete "${title}"?`)) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`https://zipacres-v-1.onrender.com/api/properties/${propertyId}`, {
+      const res = await fetch(`https://zipacres.onrender.com/api/properties/${propertyId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -53,7 +53,7 @@ export default function Dashboard() {
   const handleSaveEdit = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`https://zipacres-v-1.onrender.com/api/properties/${editingProperty._id}`, {
+      const res = await fetch(`https://zipacres.onrender.com/api/properties/${editingProperty._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
