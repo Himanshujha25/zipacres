@@ -181,7 +181,7 @@ export default function Home() {
         <NavLink
           to="/signup"
           className={({ isActive }) =>
-            `rounded-md px-3 py-2 text-sm bg-blue-800 font-medium text-white hover:bg-blue-800 ${isActive ? 'bg-blue-800' : ''}`
+            `rounded-md px-3 py-2 text-sm  font-medium text-white hover:bg-blue-800 ${isActive ? 'bg-blue-800' : ''}`
           }
         >
           Sign Up
