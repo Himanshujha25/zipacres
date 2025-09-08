@@ -183,128 +183,170 @@ export default function AddProperty() {
             </div>
 
             {/* Images */}
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-                <div className="w-2 h-6 bg-purple-800 rounded-full mr-3"></div>
-                Property Images
-              </h3>
+           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 shadow-sm">
+  <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+    <div className="w-2 h-6 bg-purple-800 rounded-full mr-3"></div>
+    Property Images
+  </h3>
 
-              {/* Cover Image */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Cover Image
-                </label>
+  {/* Cover Image */}
+  <div className="mb-8">
+  <label className="block text-sm font-semibold text-gray-700 mb-2">
+    Cover Image
+  </label>
 
-                <div className="bg-white rounded-xl p-4 border border-gray-200">
-                  {uploadMode.cover === 'url' ? (
-                    <input
-                      type="text"
-                      placeholder="Enter image URL"
-                      value={form.image}
-                      onChange={(e) =>
-                        setForm({ ...form, image: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md"
-                    />
-                  ) : (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileUpload(e.target.files[0], 'cover')}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md"
-                    />
-                  )}
+  <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm space-y-4">
+    {/* Input + Toggle on one line for larger screens */}
+    <div className="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-3 md:space-y-0">
+      {uploadMode.cover === 'url' ? (
+        <input
+          type="text"
+          placeholder="Enter image URL"
+          value={form.image}
+          onChange={(e) => setForm({ ...form, image: e.target.value })}
+          className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-lg 
+                     focus:ring-2 focus:ring-purple-600 focus:border-transparent 
+                     transition-all text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md"
+        />
+      ) : (
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleFileUpload(e.target.files[0], 'cover')}
+          className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-lg 
+                     focus:ring-2 focus:ring-purple-600 focus:border-transparent 
+                     transition-all text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md"
+        />
+      )}
 
-                  <button
-                    type="button"
-                    onClick={() => toggleUploadMode('cover')}
-                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
-                  >
-                    {uploadMode.cover === 'url' ? 'Use File' : 'Use URL'}
-                  </button>
+      <button
+        type="button"
+        onClick={() => toggleUploadMode('cover')}
+        className="px-5 py-2 bg-gradient-to-r from-purple-600 to-purple-700 
+                   text-white rounded-lg hover:from-purple-700 hover:to-purple-800 
+                   transition-all font-medium text-sm shadow-sm whitespace-nowrap"
+      >
+        {uploadMode.cover === 'url' ? 'Use File' : 'Use URL'}
+      </button>
+    </div>
 
-                  {form.image && (
-                    <div className="relative mt-4 inline-block">
-                      <img
-                        src={form.image}
-                        alt="Cover"
-                        className="h-32 w-48 object-cover rounded-xl shadow-md"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setForm({ ...form, image: '' })}
-                        className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full p-1 shadow"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+    {/* Preview */}
+    {form.image && (
+      <div className="relative inline-block">
+        <img
+          src={form.image}
+          alt="Cover"
+          className="h-40 w-64 object-cover rounded-lg shadow-md"
+        />
+        <button
+          type="button"
+          onClick={() => setForm({ ...form, image: '' })}
+          title="Remove image"
+          className="absolute -top-2 -right-2 flex items-center justify-center 
+                     w-7 h-7 rounded-full bg-red-500 text-white 
+                     hover:bg-red-600 shadow-md hover:shadow-lg 
+                     transition-all duration-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-3.5 h-3.5"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    )}
+  </div>
+</div>
 
-              {/* Gallery Images */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">Gallery</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {form.gallery.map((img, i) => (
-                    <div
-                      key={i}
-                      className="relative bg-white rounded-xl p-4 border border-gray-200 space-y-3"
-                    >
-                      <div className="text-sm font-medium text-gray-600">Image {i + 1}</div>
 
-                      {uploadMode.gallery[i] === 'url' ? (
-                        <input
-                          type="text"
-                          placeholder={`Image ${i + 1} URL`}
-                          value={img}
-                          onChange={(e) => handleGalleryChange(i, e.target.value)}
-                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm"
-                        />
-                      ) : (
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e.target.files[0], 'gallery', i)}
-                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm"
-                        />
-                      )}
+  {/* Gallery Images */}
+  <div>
+    <label className="block text-sm font-semibold text-gray-700 mb-3">
+      Gallery
+    </label>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {form.gallery.map((img, i) => (
+        <div
+          key={i}
+          className="relative bg-white rounded-xl p-4 border border-gray-200 shadow-sm space-y-3"
+        >
+          <div className="text-sm font-medium text-gray-600">Image {i + 1}</div>
 
-                      <button
-                        type="button"
-                        onClick={() => toggleUploadMode('gallery', i)}
-                        className="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-xs"
-                      >
-                        {uploadMode.gallery[i] === 'url' ? 'File' : 'URL'}
-                      </button>
+          {uploadMode.gallery[i] === 'url' ? (
+            <input
+              type="text"
+              placeholder={`Image ${i + 1} URL`}
+              value={img}
+              onChange={(e) => handleGalleryChange(i, e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg 
+                         focus:ring-2 focus:ring-purple-600 focus:border-transparent 
+                         transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm shadow-sm hover:shadow-md"
+            />
+          ) : (
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e.target.files[0], 'gallery', i)}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg 
+                         focus:ring-2 focus:ring-purple-600 focus:border-transparent 
+                         transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm shadow-sm hover:shadow-md"
+            />
+          )}
 
-                      {img && (
-                        <div className="relative">
-                          <img
-                            src={img}
-                            alt={`Gallery ${i + 1}`}
-                            className="h-24 w-full object-cover rounded-lg shadow-sm"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              // remove this image from gallery
-                              const newGallery = [...form.gallery];
-                              newGallery[i] = ''; // or splice if you want to shrink array
-                              setForm({ ...form, gallery: newGallery });
-                            }}
-                            className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full p-1 shadow"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <button
+            type="button"
+            onClick={() => toggleUploadMode('gallery', i)}
+            className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 
+                       text-white rounded-lg hover:from-purple-700 hover:to-purple-800 
+                       transition-all font-medium text-xs shadow-sm"
+          >
+            {uploadMode.gallery[i] === 'url' ? 'File' : 'URL'}
+          </button>
 
+          {img && (
+            <div className="relative">
+              <img
+                src={img}
+                alt={`Gallery ${i + 1}`}
+                className="h-28 w-full object-cover rounded-lg shadow-md"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const newGallery = [...form.gallery];
+                  newGallery[i] = '';
+                  setForm({ ...form, gallery: newGallery });
+                }}
+                title="Remove image"
+                className="absolute -top-2 -right-2 flex items-center justify-center 
+                           w-6 h-6 rounded-full bg-red-500 text-white 
+                           hover:bg-red-600 shadow-md hover:shadow-lg 
+                           transition-all duration-300"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-3 h-3"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
 
             {/* Description */}
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
