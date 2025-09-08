@@ -20,9 +20,9 @@ export default function Blog() {
   const blogPosts = [
     {
       id: 1,
-      title: "Prime Investment Opportunities in Noida 2025",
+      title: "Prime Investment Opportunities in Noida ",
       content:
-        "Discover the most lucrative real estate investment zones in Mumbai with expert market analysis and projected returns for smart investors. From luxury residential projects to commercial hotspots, we cover key areas, growth trends, and insights to maximize your returns.",
+        "Discover the most lucrative real estate investment zones in Noida with expert market analysis and projected returns for smart investors. From luxury residential projects to commercial hotspots, we cover key areas, growth trends, and insights to maximize your returns.",
       date: "August 21, 2024",
       image:
         "https://media.istockphoto.com/id/1150545984/photo/upscale-modern-mansion-with-pool.jpg?s=612x612&w=0&k=20&c=JT7qSGgmlGfiNiqJE2jw6rYwRcYCj9KBs7i2Rmyyypo=",
@@ -230,8 +230,15 @@ export default function Blog() {
     href="https://www.youtube.com/@zipacres"
     target="_blank"
     rel="noopener noreferrer"
-    className="inline-block px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white text-lg font-semibold rounded-full shadow-xl hover:from-red-700 hover:to-red-800 transition-all"
+    className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white text-lg font-semibold rounded-full shadow-xl hover:from-red-700 hover:to-red-800 transition-all"
   >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-6 h-6 fill-current text-white"
+      viewBox="0 0 576 512"
+    >
+      <path d="M549.655 124.083c-6.281-23.65-24.81-42.18-48.459-48.459C458.299 64 288 64 288 64S117.701 64 74.804 75.624c-23.65 6.281-42.179 24.81-48.459 48.459C14.721 167.02 14.721 256 14.721 256s0 88.98 11.624 131.917c6.281 23.65 24.81 42.18 48.459 48.459C117.701 448 288 448 288 448s170.299 0 213.196-11.624c23.65-6.281 42.179-24.81 48.459-48.459C561.279 344.98 561.279 256 561.279 256s0-88.98-11.624-131.917zM232 338.5v-165l142 82.5-142 82.5z"/>
+    </svg>
     Explore More on Our YouTube Channel
   </a>
 </div>

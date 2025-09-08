@@ -142,7 +142,7 @@ const submit = async (e) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-3">Type</label>
                   <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md">
                     <option>Apartment</option>
-                    <option>Land/Plot</option>
+                    <option>Plot</option>
                     <option>Villa</option>
                     <option>Penthouse</option>
                     <option>Studio</option>
@@ -173,6 +173,7 @@ const submit = async (e) => {
                       <label className="block text-sm font-semibold text-gray-700 mb-3">Area Unit</label>
                       <select value={form.areaUnit} onChange={(e) => setForm({ ...form, areaUnit: e.target.value })} className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md">
                         <option value="sqft">Square Feet</option>
+                        <option value="sqyd">Square Yard</option>
                         <option value="gaj">Gaj</option>
                       </select>
                     </div>

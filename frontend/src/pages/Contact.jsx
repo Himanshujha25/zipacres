@@ -203,11 +203,8 @@ export default function Contact() {
                         <option value="Property Inquiry">
                           Looking for a job
                         </option>
-                        <option value="Property Inquiry">
-                          Need property details on
-                        </option>
-                        <option value="Property Inquiry">
-                         WhatsAPp
+                        <option value="WhatsApp Property Details">
+                          Need property details on WhatsApp
                         </option>
 
                         <option value="Property Valuation">
