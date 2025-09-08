@@ -152,7 +152,7 @@ const submit = async (e) => {
                     <option>Builder Floor</option>
                   </select>
                 </div>
-                {form.type !== "Land/Plot" ? (
+                {form.type !== "Plot" ? (
                   <>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-3">Bedrooms</label>
