@@ -268,7 +268,7 @@ export default function Contact() {
                   </div>
                   <div className="ml-3">
                     <p className="font-medium text-gray-900">WhatsApp</p>
-                    <p className="text-sm text-gray-600">9990-263-263</p>
+                    <p className="text-sm text-gray-600">+91 9990263263</p>
                   </div>
                 </a>
                 <a
@@ -280,7 +280,7 @@ export default function Contact() {
                   </div>
                   <div className="ml-3">
                     <p className="font-medium text-gray-900">Call Us</p>
-                    <p className="text-sm text-gray-600">9990-263-263</p>
+                    <p className="text-sm text-gray-600">+91 9990263263</p>
                   </div>
                 </a>
                 <a
@@ -324,7 +324,7 @@ export default function Contact() {
                 {
                   question: "Do you charge for property consultation?",
                   answer:
-                    "Initial consultation and property viewing are completely free. We only charge commission after successful transactions.",
+                    "Initial consultation and property viewing are completely free. We don't charge commission after successful transactions.",
                 },
                 {
                   question: "Can you help with property arrangements?",
