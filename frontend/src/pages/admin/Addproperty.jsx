@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; 
-import { useProperties } from "../../context/PropertyContext"; 
+import { useAuth } from "../../context/AuthContext";
+import { useProperties } from "../../context/PropertyContext";
 
 
 export default function AddProperty() {
   const navigate = useNavigate();
-   const { user } = useAuth(); 
-   const { addProperty } = useProperties();
+  const { user } = useAuth();
+  const { addProperty } = useProperties();
 
   const [form, setForm] = useState({
     title: "",
@@ -23,7 +23,7 @@ export default function AddProperty() {
     desc: ""
   });
 
-  const [uploadMode, setUploadMode] = useState({ cover: 'url', gallery: ['url', 'url', 'url','url','url'] });
+  const [uploadMode, setUploadMode] = useState({ cover: 'url', gallery: ['url', 'url', 'url', 'url', 'url'] });
 
   const handleGalleryChange = (index, value) => {
     const updatedGallery = [...form.gallery];
@@ -59,45 +59,45 @@ export default function AddProperty() {
     }
   };
 
-const submit = async (e) => {
-  e.preventDefault();
+  const submit = async (e) => {
+    e.preventDefault();
 
-  if (!user?.token) {
-    alert("You must be logged in to add a property!");
-    return;
-  }
+    if (!user?.token) {
+      alert("You must be logged in to add a property!");
+      return;
+    }
 
-  try {
-    const res = await fetch("https://zipacres.onrender.com/api/properties", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${user.token}`
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("https://zipacres.onrender.com/api/properties", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`
+        },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!data.success) throw new Error(data.message);
+      if (!data.success) throw new Error(data.message);
 
-    // ✅ Add property to context so dashboard updates immediately
-    addProperty(data.property);
+      // ✅ Add property to context so dashboard updates immediately
+      addProperty(data.property);
 
-    alert("Property added successfully!");
-    navigate(-1); // back to dashboard
-  } catch (err) {
-    console.error(err);
-    alert("Failed to add property: " + err.message);
-  }
-};
+      alert("Property added successfully!");
+      navigate(-1); // back to dashboard
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add property: " + err.message);
+    }
+  };
 
 
   const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors bg-white";
   const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
   return (
-   <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 lg:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-3xl shadow-2xl p-8 space-y-8 border border-gray-100">
           <div className="bg-gradient-to-r from-blue-900 to-blue-950 px-8 py-6 rounded-2xl shadow-xl relative overflow-hidden">
@@ -108,7 +108,7 @@ const submit = async (e) => {
             </div>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-16 translate-x-16"></div>
           </div>
-          
+
           <form onSubmit={submit} className="space-y-8">
             {/* Basic Info */}
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
@@ -188,39 +188,123 @@ const submit = async (e) => {
                 <div className="w-2 h-6 bg-purple-800 rounded-full mr-3"></div>
                 Property Images
               </h3>
-              
+
               {/* Cover Image */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">Cover Image</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Cover Image
+                </label>
+
                 <div className="bg-white rounded-xl p-4 border border-gray-200">
                   {uploadMode.cover === 'url' ? (
-                    <input type="text" placeholder="Enter image URL" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md" />
+                    <input
+                      type="text"
+                      placeholder="Enter image URL"
+                      value={form.image}
+                      onChange={(e) =>
+                        setForm({ ...form, image: e.target.value })
+                      }
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md"
+                    />
                   ) : (
-                    <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e.target.files[0], 'cover')} className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e.target.files[0], 'cover')}
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md"
+                    />
                   )}
-                  <button type="button" onClick={() => toggleUploadMode('cover')} className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm">{uploadMode.cover === 'url' ? 'Use File' : 'Use URL'}</button>
-                  {form.image && <img src={form.image} alt="Cover" className="mt-4 h-32 w-48 object-cover rounded-xl shadow-md" />}
+
+                  <button
+                    type="button"
+                    onClick={() => toggleUploadMode('cover')}
+                    className="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
+                  >
+                    {uploadMode.cover === 'url' ? 'Use File' : 'Use URL'}
+                  </button>
+
+                  {form.image && (
+                    <div className="relative mt-4 inline-block">
+                      <img
+                        src={form.image}
+                        alt="Cover"
+                        className="h-32 w-48 object-cover rounded-xl shadow-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, image: '' })}
+                        className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full p-1 shadow"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
+
 
               {/* Gallery Images */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">Gallery</label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {form.gallery.map((img, i) => (
-                    <div key={i} className="bg-white rounded-xl p-4 border border-gray-200 space-y-3">
-                      <div className="text-sm font-medium text-gray-600">Image {i+1}</div>
+                    <div
+                      key={i}
+                      className="relative bg-white rounded-xl p-4 border border-gray-200 space-y-3"
+                    >
+                      <div className="text-sm font-medium text-gray-600">Image {i + 1}</div>
+
                       {uploadMode.gallery[i] === 'url' ? (
-                        <input type="text" placeholder={`Image ${i+1} URL`} value={img} onChange={(e) => handleGalleryChange(i, e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm" />
+                        <input
+                          type="text"
+                          placeholder={`Image ${i + 1} URL`}
+                          value={img}
+                          onChange={(e) => handleGalleryChange(i, e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm"
+                        />
                       ) : (
-                        <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e.target.files[0], 'gallery', i)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e.target.files[0], 'gallery', i)}
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 text-sm"
+                        />
                       )}
-                      <button type="button" onClick={() => toggleUploadMode('gallery', i)} className="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-xs">{uploadMode.gallery[i] === 'url' ? 'File' : 'URL'}</button>
-                      {img && <img src={img} alt={`Gallery ${i+1}`} className="h-24 w-full object-cover rounded-lg shadow-sm" />}
+
+                      <button
+                        type="button"
+                        onClick={() => toggleUploadMode('gallery', i)}
+                        className="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-xs"
+                      >
+                        {uploadMode.gallery[i] === 'url' ? 'File' : 'URL'}
+                      </button>
+
+                      {img && (
+                        <div className="relative">
+                          <img
+                            src={img}
+                            alt={`Gallery ${i + 1}`}
+                            className="h-24 w-full object-cover rounded-lg shadow-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // remove this image from gallery
+                              const newGallery = [...form.gallery];
+                              newGallery[i] = ''; // or splice if you want to shrink array
+                              setForm({ ...form, gallery: newGallery });
+                            }}
+                            className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full p-1 shadow"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
+
             </div>
 
             {/* Description */}
