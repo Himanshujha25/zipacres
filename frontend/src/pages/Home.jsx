@@ -748,10 +748,14 @@ export default function Home() {
                 Visit Our Headquarters
               </p>
               <a
-                href="#/contact"
-                className="text-purple-800 font-semibold hover:text-purple-900 transition-colors"
-              >
-                Get Directions
+  href="https://www.google.com/maps?q=Tower+211A,+Near+Universal+Hospital,+Bypass+Road,+Badarpur+Border,+New+Delhi+110044"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-purple-800 font-semibold hover:text-purple-900 transition-colors"
+>
+  Get Directions
+</a>
+
               </a>
             </motion.div>
           </motion.div>
