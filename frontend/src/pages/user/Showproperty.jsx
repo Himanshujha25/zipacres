@@ -138,12 +138,13 @@ export default function Properties() {
         >
           <option>All</option>
           <option>Apartment</option>
+           <option>Land/Plot</option>
           <option>Villa</option>
           <option>Penthouse</option>
           <option>Studio</option>
           <option>Independent House</option>
           <option>Farmhouse</option>
-          <option>Land/Plot</option>
+          <option>Commercial Shop</option>
         </select>
         <select
           value={tempFilters.price}

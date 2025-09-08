@@ -166,7 +166,7 @@ export default function PropertyDetails() {
                 </button>
 
                 <a
-                  href={`https://wa.me/919876543210?text=Interested in ${property.title}`}
+                  href={`https://wa.me/919990263263?text=Interested%20in%20${encodeURIComponent(property.title)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="block w-full bg-gradient-to-r from-green-700 to-green-800 text-white text-center py-4 rounded-xl hover:from-green-800 hover:to-green-700 transition font-semibold shadow-2xl flex items-center justify-center gap-2"

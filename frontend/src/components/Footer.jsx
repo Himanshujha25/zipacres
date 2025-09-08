@@ -102,7 +102,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center text-gray-400">
                 <PhoneIcon />
-                <span className="ml-3"> 9990-263-263</span>
+                <span className="ml-3">+91 9990263263</span>
               </div>
               <div className="flex items-center text-gray-400">
                 <MailIcon />
