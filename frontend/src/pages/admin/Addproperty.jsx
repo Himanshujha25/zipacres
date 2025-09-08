@@ -242,7 +242,6 @@ export default function AddProperty() {
                 </div>
               </div>
 
-
               {/* Gallery Images */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">Gallery</label>
