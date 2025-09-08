@@ -144,7 +144,6 @@ export default function Properties() {
           <option>Studio</option>
           <option>Independent House</option>
           <option>Farmhouse</option>
-          <option>Commercial Shop</option>
         </select>
         <select
           value={tempFilters.price}

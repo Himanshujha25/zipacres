@@ -19,11 +19,11 @@ export default function AddProperty() {
     areaSqft: 600,
     areaUnit: "sqft",
     image: "",
-    gallery: ["", "", ""],
+    gallery: ["", "", "", "", ""],
     desc: ""
   });
 
-  const [uploadMode, setUploadMode] = useState({ cover: 'url', gallery: ['url', 'url', 'url'] });
+  const [uploadMode, setUploadMode] = useState({ cover: 'url', gallery: ['url', 'url', 'url','url','url'] });
 
   const handleGalleryChange = (index, value) => {
     const updatedGallery = [...form.gallery];
@@ -142,6 +142,7 @@ const submit = async (e) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-3">Type</label>
                   <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-900 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-sm hover:shadow-md">
                     <option>Apartment</option>
+                    <option>Land/Plot</option>
                     <option>Villa</option>
                     <option>Penthouse</option>
                     <option>Studio</option>
@@ -149,7 +150,6 @@ const submit = async (e) => {
                     <option>Farmhouse</option>
                     <option>Duplex</option>
                     <option>Builder Floor</option>
-                    <option>Land/Plot</option>
                   </select>
                 </div>
                 {form.type !== "Land/Plot" ? (
