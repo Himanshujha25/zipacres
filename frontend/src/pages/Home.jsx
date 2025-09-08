@@ -615,8 +615,8 @@ export default function Home() {
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
                   className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentTestimonial
-                      ? "bg-gray-800 scale-125"
-                      : "bg-gray-900 hover:bg-gray-800"
+                    ? "bg-gray-800 scale-125"
+                    : "bg-gray-900 hover:bg-gray-800"
                     }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
@@ -709,7 +709,7 @@ export default function Home() {
                 href="tel:+911234567890"
                 className="text-blue-800 font-semibold hover:text-blue-900 transition-colors"
               >
-               +91 9990-263-263
+                +91 9990-263-263
               </a>
             </motion.div>
 
@@ -730,7 +730,7 @@ export default function Home() {
                 href="mailto:info@zipacres.com"
                 className="text-green-800 font-semibold hover:text-green-900 transition-colors"
               >
-                      contact@zipacres.com
+                contact@zipacres.com
               </a>
             </motion.div>
 
@@ -748,15 +748,14 @@ export default function Home() {
                 Visit Our Headquarters
               </p>
               <a
-  href="https://www.google.com/maps?q=Tower+211A,+Near+Universal+Hospital,+Bypass+Road,+Badarpur+Border,+New+Delhi+110044"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-purple-800 font-semibold hover:text-purple-900 transition-colors"
->
-  Get Directions
-</a>
-
+                href="https://www.google.com/maps?q=Tower+211A,+Near+Universal+Hospital,+Bypass+Road,+Badarpur+Border,+New+Delhi+110044"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-800 font-semibold hover:text-purple-900 transition-colors"
+              >
+                Get Directions
               </a>
+
             </motion.div>
           </motion.div>
         </div>
