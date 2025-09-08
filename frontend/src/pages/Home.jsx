@@ -709,7 +709,7 @@ export default function Home() {
                 href="tel:+911234567890"
                 className="text-blue-800 font-semibold hover:text-blue-900 transition-colors"
               >
-                +91 9990-263-263
+                +91 9990263263
               </a>
             </motion.div>
 
