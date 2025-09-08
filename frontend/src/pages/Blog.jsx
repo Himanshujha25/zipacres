@@ -210,18 +210,32 @@ export default function Blog() {
         </motion.div>
 
         {/* YouTube Video */}
-        <motion.div className="relative max-w-4xl  mx-auto rounded-3xl overflow-hidden shadow-2xl mb-24">
-          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-            <iframe
-              className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/8-GwOifS2MA?autoplay=1&mute=1&loop=1&playlist=8-GwOifS2MA&controls=1&rel=0&modestbranding=1"
-              title="Real Estate Success Stories"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </motion.div>
+      {/* Video block */}
+<motion.div className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl mb-12">
+  <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+    <iframe
+      className="absolute top-0 left-0 w-full h-full"
+      src="https://www.youtube.com/embed/8-GwOifS2MA?autoplay=1&mute=1&loop=1&playlist=8-GwOifS2MA&controls=1&rel=0&modestbranding=1"
+      title="Real Estate Success Stories"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    ></iframe>
+  </div>
+</motion.div>
+
+{/* Stand-alone channel button */}
+<div className="flex justify-center">
+  <a
+    href="https://www.youtube.com/@zipacres"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-block px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white text-lg font-semibold rounded-full shadow-xl hover:from-red-700 hover:to-red-800 transition-all"
+  >
+    Explore More on Our YouTube Channel
+  </a>
+</div>
+
       </div>
     </div>
   );
