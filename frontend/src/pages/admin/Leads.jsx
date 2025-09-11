@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { debounce } from "lodash";
 
@@ -14,14 +14,26 @@ export default function Leads() {
 
   const API_BASE = "http://localhost:5000/api";
 
-  const showMessage = (msg, isErr = false) => {
+  const showMessage = useCallback((msg, isErr = false) => {
     setMessage(msg);
     setIsError(isErr);
     setTimeout(() => setMessage(null), 3000);
-  };
+  }, []);
 
-  const formatPhoneNumbers = (phoneNumbers) => {
-    if (!phoneNumbers || phoneNumbers.length === 0) return "No phone";
+  const formatPhoneNumbers = (phoneData) => {
+    // Handle both string and array formats
+    let phoneNumbers = [];
+    
+    if (Array.isArray(phoneData)) {
+      phoneNumbers = phoneData.filter(num => num && num.trim());
+    } else if (phoneData && typeof phoneData === 'string') {
+      phoneNumbers = [phoneData.trim()];
+    }
+    
+    if (phoneNumbers.length === 0) {
+      return <span className="text-gray-400 italic">No phone</span>;
+    }
+    
     return (
       <div className="flex flex-col gap-1">
         {phoneNumbers.map((num, idx) => (
@@ -51,14 +63,21 @@ export default function Leads() {
       return;
     }
 
+    const controller = new AbortController();
+
     fetch(`${API_BASE}/leads`, {
       headers: { Authorization: `Bearer ${token}` },
+      signal: controller.signal,
     })
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch leads (${res.status})`);
         return res.json();
       })
       .then((data) => {
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid data format received");
+        }
+        
         setUsers(data);
         const contactedMap = {};
         const notesMap = {};
@@ -70,14 +89,19 @@ export default function Leads() {
         setNotes(notesMap);
       })
       .catch((error) => {
-        console.error("Error fetching leads:", error);
-        showMessage("Error fetching leads.", true);
+        if (error.name !== 'AbortError') {
+          console.error("Error fetching leads:", error);
+          showMessage("Error fetching leads.", true);
+        }
       })
       .finally(() => setLoading(false));
-  }, [token]);
+
+    // Cleanup function
+    return () => controller.abort();
+  }, [token, showMessage]);
 
   // Save function for backend
-  const handleSave = (userId, contactedValue = contacted[userId], noteValue = notes[userId]) => {
+  const handleSave = useCallback((userId, contactedValue = contacted[userId], noteValue = notes[userId]) => {
     const token = localStorage.getItem("token");
     if (!token) return showMessage("Missing auth token", true);
 
@@ -109,46 +133,55 @@ export default function Leads() {
         console.error("Error updating lead:", err);
         showMessage("Error updating lead.", true);
       });
-  };
+  }, [contacted, notes, showMessage]);
 
   // Debounced note saving
   const saveNoteDebounced = useMemo(
     () => debounce((id, value) => handleSave(id, contacted[id], value), 500),
-    [contacted]
+    [contacted, handleSave]
   );
 
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      saveNoteDebounced.cancel();
+    };
+  }, [saveNoteDebounced]);
+
   // Handle checkbox
-  const handleContactedChange = (id) => {
+  const handleContactedChange = useCallback((id) => {
     setContacted((prev) => {
       const newStatus = !prev[id];
       handleSave(id, newStatus, notes[id]); // Save immediately
       return { ...prev, [id]: newStatus };
     });
-  };
+  }, [handleSave, notes]);
 
   // Handle note change
-  const handleNoteChange = (id, value) => {
+  const handleNoteChange = useCallback((id, value) => {
     setNotes((prev) => ({ ...prev, [id]: value }));
     saveNoteDebounced(id, value);
-  };
+  }, [saveNoteDebounced]);
 
   // Filtered leads
-  const filtered = users.filter((u) => {
-    const phoneString = u.phoneNumber || "";
-    const matchesSearch =
-      u.name?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase()) ||
-      phoneString.toLowerCase().includes(search.toLowerCase());
+  const filtered = useMemo(() => {
+    return users.filter((u) => {
+      const phoneString = u.phoneNumber || "";
+      const matchesSearch =
+        u.name?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email?.toLowerCase().includes(search.toLowerCase()) ||
+        phoneString.toLowerCase().includes(search.toLowerCase());
 
-    const matchView =
-      view === "all"
-        ? true
-        : view === "contacted"
-        ? contacted[u._id]
-        : !contacted[u._id];
+      const matchView =
+        view === "all"
+          ? true
+          : view === "contacted"
+          ? contacted[u._id]
+          : !contacted[u._id];
 
-    return matchesSearch && matchView;
-  });
+      return matchesSearch && matchView;
+    });
+  }, [users, search, view, contacted]);
 
   return (
     <div className="bg-gray-50 min-h-screen py-10 px-4 sm:px-6 max-w-7xl mx-auto font-sans">
@@ -220,17 +253,17 @@ export default function Leads() {
           <p className="ml-3 text-gray-500 text-lg">Loading leads…</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl sm:rounded-3xl shadow-lg sm          :shadow-2xl overflow-hidden">
+        <div className="bg-white rounded-xl sm:rounded-3xl shadow-lg sm:shadow-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-gray-700">
               <thead className="bg-gradient-to-r from-blue-800 to-blue-900 text-white">
                 <tr>
-                  <th className="px-3 py-3 text-xs sm:text-sm">Name</th>
-                  <th className="px-3 py-3 text-xs sm:text-sm">Email</th>
-                  <th className="px-3 py-3 text-xs sm:text-sm">Phone Numbers</th>
-                  <th className="px-3 py-3 text-xs sm:text-sm text-center">Contacted</th>
-                  <th className="px-3 py-3 text-xs sm:text-sm">Note</th>
-                  <th className="px-3 py-3 text-xs sm:text-sm">Actions</th>
+                  <th className="px-3 py-3 text-xs sm:text-sm font-semibold">Name</th>
+                  <th className="px-3 py-3 text-xs sm:text-sm font-semibold">Email</th>
+                  <th className="px-3 py-3 text-xs sm:text-sm font-semibold">Phone Numbers</th>
+                  <th className="px-3 py-3 text-xs sm:text-sm text-center font-semibold">Contacted</th>
+                  <th className="px-3 py-3 text-xs sm:text-sm font-semibold">Note</th>
+                  <th className="px-3 py-3 text-xs sm:text-sm font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,24 +281,18 @@ export default function Leads() {
                     <td className="px-3 py-4 font-bold text-gray-800 text-sm sm:text-base">
                       {user?.name || "No name"}
                     </td>
-                    <td className="px-3 py-4 text-blue-600 text-sm sm:text-base">
+                    <td className="px-3 py-4 text-blue-600 text-sm sm:text-base break-all">
                       {user?.email || "No email"}
                     </td>
                     <td className="px-3 py-4 text-blue-600 text-sm sm:text-base">
-                      {formatPhoneNumbers(
-                        Array.isArray(user?.phoneNumber)
-                          ? user.phoneNumber
-                          : user?.phoneNumber
-                          ? [user.phoneNumber]
-                          : []
-                      )}
+                      {formatPhoneNumbers(user?.phoneNumber)}
                     </td>
                     <td className="px-3 py-4 text-center">
                       <input
                         type="checkbox"
                         checked={contacted[user._id] || false}
                         onChange={() => handleContactedChange(user._id)}
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2"
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2 cursor-pointer"
                       />
                     </td>
                     <td className="px-3 py-4">
@@ -277,12 +304,14 @@ export default function Leads() {
                         }
                         placeholder="Add note..."
                         className="border border-gray-300 rounded-lg px-2 py-1 w-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        maxLength={500}
                       />
                     </td>
                     <td className="px-3 py-4 space-x-2">
                       <button
                         onClick={() => handleSave(user._id)}
-                        className="px-2 py-1 sm:px-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium"
+                        className="px-2 py-1 sm:px-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500"
+                        title="Save changes"
                       >
                         Save
                       </button>
@@ -304,7 +333,7 @@ export default function Leads() {
                             strokeLinejoin="round"
                             strokeWidth="2"
                             d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-4m-8 0H4"
-                          ></path>
+                          />
                         </svg>
                         <p className="text-base sm:text-lg font-medium">No leads found</p>
                         <p className="text-xs sm:text-sm">
@@ -320,16 +349,21 @@ export default function Leads() {
         </div>
       )}
 
-      <style>
-        {`
-          @keyframes fade-in-down {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+      <style jsx>{`
+        @keyframes fade-in-down {
+          from { 
+            opacity: 0; 
+            transform: translateY(-20px); 
           }
-          .animate-fade-in-down { animation: fade-in-down 0.3s ease-out; }
-        `}
-      </style>
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        .animate-fade-in-down { 
+          animation: fade-in-down 0.3s ease-out; 
+        }
+      `}</style>
     </div>
   );
 }
-
