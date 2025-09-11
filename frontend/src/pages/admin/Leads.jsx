@@ -50,7 +50,7 @@ export default function Leads() {
   // Fetch all leads on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/leads", {
+    fetch("https://zipacres.onrender.com/api/leads", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -87,7 +87,7 @@ export default function Leads() {
   // Save contacted + note to backend
   const handleSave = (userId) => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:5000/api/leads/${userId}`, {
+    fetch(`https://zipacres.onrender.com/api/leads/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -128,7 +128,7 @@ export default function Leads() {
     setShowConfirm(false); // Close the modal
     setLeadToDelete(null);
 
-    fetch(`http://localhost:5000/api/leads/${userId}`, {
+    fetch(`https://zipacres.onrender.com/api/leads/${userId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
