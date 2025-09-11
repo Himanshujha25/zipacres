@@ -14,6 +14,8 @@ const icons = {
   plus: "M12 6v6m0 0v6m0-6h6m-6 0H6",
   edit: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z",
   delete: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
+leads:
+    "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 110 7.75M8 3.13a4 4 0 110 7.75",
 };
 
 const inputClass =
@@ -87,24 +89,39 @@ export default function Dashboard() {
     <div className="bg-gray-100 min-h-screen">
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <header className="bg-gradient-to-r from-blue-900 via-blue-950 to-blue-900 px-6 py-5 rounded-lg shadow-lg">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <img src="/images/Zipacres Logo.png" alt="Logo" className="h-12 w-12 rounded-lg" />
-              <div>
-                <h1 className="text-2xl font-semibold text-white">ZipAcres Admin</h1>
-                <p className="text-slate-300">Hello, {userName}</p>
-              </div>
-            </div>
-            <Link
-              to="/admin/addproperty"
-              className="flex items-center gap-2 bg-zinc-200 hover:scale-105 transition-transform duration-300 text-black font-medium py-2.5 px-5 rounded-lg shadow-lg"
-            >
-              <Icon path={icons.plus} className="w-4 h-4 text-black" />
-              Add Property
-            </Link>
-          </div>
-        </header>
+<header className="bg-gradient-to-r from-blue-900 via-blue-950 to-blue-900 px-6 py-5 rounded-lg shadow-lg">
+  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="flex items-center gap-3">
+      <img src="/images/Zipacres Logo.png" alt="Logo" className="h-12 w-12 rounded-lg" />
+      <div>
+        <h1 className="text-2xl font-semibold text-white">ZipAcres Admin</h1>
+        <p className="text-slate-300">Hello, {userName}</p>
+      </div>
+    </div>
+
+    <div className="flex gap-3">
+      {/* Leads button */}
+      <Link
+        to="/admin/leads"
+        className="flex items-center gap-2 bg-zinc-200 hover:scale-105 transition-transform duration-300 text-black font-medium py-2.5 px-5 rounded-lg shadow-lg"
+      >
+        <Icon path={icons.leads} className="w-4 h-4 text-black" />
+        Leads
+      </Link>
+
+      {/* Add Property button */}
+      <Link
+        to="/admin/addproperty"
+        className="flex items-center gap-2 bg-zinc-200 hover:scale-105 transition-transform duration-300 text-black font-medium py-2.5 px-5 rounded-lg shadow-lg"
+      >
+        <Icon path={icons.plus} className="w-4 h-4 text-black" />
+        Add Property
+      </Link>
+    </div>
+  </div>
+</header>
+
+
 
         {/* Filters */}
         <div className="bg-white p-4 rounded-xl shadow flex flex-col md:flex-row gap-4">

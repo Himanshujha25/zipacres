@@ -13,4 +13,5 @@ router.post("/", protect, adminOnly, propertyController.addProperty);
 router.put("/:id", protect, adminOnly, propertyController.updateProperty);
 router.delete("/:id", protect, adminOnly, propertyController.deleteProperty);
 
+
 module.exports = router;

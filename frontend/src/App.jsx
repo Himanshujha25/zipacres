@@ -13,6 +13,7 @@ import Properties from "./pages/user/Showproperty";
 import PropertyDetails from "./pages/user/PropertyDetails";
 import ProtectedRoute from "./components/Protectedroute";
 import "./index.css"
+import Leads from "./pages/admin/Leads";
 
 const App = () => {
   return (
@@ -52,7 +53,14 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-
+           <Route
+        path="/admin/leads"
+        element={
+          <ProtectedRoute roles={[ "admin"]}>
+            <Leads />
+          </ProtectedRoute>
+        }
+      />
       </Routes>
       <Footer />
     </>

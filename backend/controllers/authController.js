@@ -19,7 +19,11 @@ const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 exports.register = async (req, res) => {
 
   try {
-    const { name, email, password, role, adminCode } = req.body;
+  // in register:
+const { name, email, password, role, adminCode, phoneNumber } = req.body;
+
+// …
+
     console.log("Register request body:", req.body);
     if (!name || !email || !password || !role) {
       return res.status(400).json({ success: false, message: "All fields are required" });
@@ -37,11 +41,12 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      name,
-      email,
-      password: hashedPassword,
-      role,
-    });
+  name,
+  email,
+  password: hashedPassword,
+  role,
+  phoneNumber: Array.isArray(phoneNumber) ? phoneNumber : [phoneNumber]
+});
     await newUser.save();
 
     const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "1d" });
@@ -92,7 +97,10 @@ exports.login = async (req, res) => {
 
 exports.googleAuth = async (req, res) => {
   try {
-    const { tokenId, email, name } = req.body;
+const { tokenId, email, name, phoneNumber } = req.body;
+
+
+
 
     let profileEmail = email;
     let profileName = name;
@@ -114,15 +122,16 @@ exports.googleAuth = async (req, res) => {
     let isNewUser = false;
 
     if (!user) {
-      isNewUser = true;
-      user = new User({
-        name: profileName,
-        email: profileEmail,
-        password: null,
-        role: "user",
-      });
-      await user.save();
-    }
+  isNewUser = true;
+  user = new User({
+    name: profileName,
+    email: profileEmail,
+    password: null,
+    role: "user",
+    phoneNumber: Array.isArray(phoneNumber) ? phoneNumber : [phoneNumber]
+  });
+  await user.save();
+}
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
