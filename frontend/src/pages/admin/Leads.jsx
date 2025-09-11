@@ -21,38 +21,23 @@ export default function Leads() {
   }, []);
 
   const formatPhoneNumbers = (phoneData) => {
-    // Handle both string and array formats
-    let phoneNumbers = [];
+  if (!phoneData) return <span className="text-gray-400 italic">No phone</span>;
 
-    if (Array.isArray(phoneData)) {
-      phoneNumbers = phoneData.filter(num => num && num.trim());
-    } else if (phoneData && typeof phoneData === 'string') {
-      phoneNumbers = [phoneData.trim()];
+  // Ensure the number starts with +91
+  let formattedNumber = phoneData.toString().trim();
+  if (!formattedNumber.startsWith("+91")) {
+    // Remove leading 0 or 91 if present
+    if (formattedNumber.startsWith("0")) {
+      formattedNumber = formattedNumber.slice(1);
+    } else if (formattedNumber.startsWith("91")) {
+      formattedNumber = formattedNumber.slice(2);
     }
+    formattedNumber = `+91${formattedNumber}`;
+  }
 
-    if (phoneNumbers.length === 0) {
-      return <span className="text-gray-400 italic">No phone</span>;
-    }
+  return <span className="text-sm font-medium text-gray-700">{formattedNumber}</span>;
+};
 
-    return (
-      <div className="flex flex-col gap-1">
-        {phoneNumbers.map((num, idx) => (
-          <div key={idx} className="flex items-center">
-            <span className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-              <svg
-                className="w-3 h-3 text-blue-600"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-              </svg>
-            </span>
-            <span className="text-sm font-medium text-gray-700">{num}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   const token = useMemo(() => localStorage.getItem("token"), []);
 
@@ -282,8 +267,9 @@ export default function Leads() {
                       {user?.email || "No email"}
                     </td>
                     <td className="px-3 py-4 text-blue-600 text-sm sm:text-base">
-                      {user?.phone || "No phone"}
-                    </td>
+  {formatPhoneNumbers(user?.phone)}
+</td>
+
 
                     <td className="px-3 py-4 text-center">
                       <input
