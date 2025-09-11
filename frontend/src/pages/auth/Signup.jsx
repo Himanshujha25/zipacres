@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 
-// ✅ Eye toggle icon
+// Eye toggle icon
 const EyeIcon = ({ isVisible }) => (
   <svg
     width="20"
@@ -45,89 +45,112 @@ export default function Signup() {
 
   const navigate = useNavigate();
 
-  // ✅ Basic password strength check
-  const isStrongPassword = (pwd) => pwd.length >= 6 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
+  const isStrongPassword = (pwd) =>
+    pwd.length >= 6 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-    // Phone validation: 10 digits
-    if (!/^\d{10}$/.test(form.phone)) {
-      setError("Please enter a valid 10-digit mobile number.");
-      return;
-    }
+  // validate 10-digit phone (adjust regex if you allow country code)
+  if (!/^\d{10}$/.test(form.phone)) {
+    setError("Please enter a valid 10-digit mobile number.");
+    return;
+  }
 
-    // Password strength
-    if (!isStrongPassword(form.password)) {
-      setError("Password must be at least 6 chars, with 1 uppercase & 1 number.");
-      return;
-    }
+  if (!isStrongPassword(form.password)) {
+    setError("Password must be at least 6 chars, with 1 uppercase & 1 number.");
+    return;
+  }
 
-    // Admin code check
-    if (role === "admin" && form.adminCode.trim() === "") {
-      setError("Admin code is required for admin signup.");
-      return;
-    }
+  if (role === "admin" && form.adminCode.trim() === "") {
+    setError("Admin code is required for admin signup.");
+    return;
+  }
 
-    setIsLoading(true);
+  setIsLoading(true);
+  try {
+    // simple string, not Number()
+    const res = await fetch("https://zipacres.onrender.com/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role,
+        // send phone exactly as entered or prepend country code if needed
+        phone: form.countryCode
+          ? form.countryCode + form.phone
+          : form.phone,
+        adminCode: form.adminCode,
+      }),
+    });
 
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || "Registration failed");
+
+    localStorage.setItem("token", data.token);
+    setSuccess("Registration successful! Redirecting to login...");
+    setTimeout(() => navigate("/login"), 2000);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+const handleGoogleSignup = useGoogleLogin({
+  onSuccess: async (tokenResponse) => {
     try {
-      const res = await fetch("https://zipacres.onrender.com/api/auth/register", {
+      const userInfoRes = await fetch(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        }
+      );
+      const profile = await userInfoRes.json();
+
+      let phone = form.phone;
+      if (!phone) {
+        phone = prompt("Please enter your 10-digit phone number:");
+        if (!phone || !/^\d{10}$/.test(phone)) {
+          setError("Invalid phone number for Google signup.");
+          return;
+        }
+      }
+
+      // ✅ send as string, include country code
+      const fullPhone = form.countryCode
+        ? form.countryCode + phone
+        : phone;
+
+      const res = await fetch("https://zipacres.onrender.com/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          role,
-          phoneNumber: form.countryCode + form.phone, // send as phoneNumber
-          adminCode: form.adminCode,
+          tokenId: tokenResponse.access_token,
+          phone: fullPhone,
         }),
       });
 
       const data = await res.json();
-      if (!data.success) throw new Error(data.message || "Registration failed");
-
-      localStorage.setItem("token", data.token);
-      setSuccess("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 2000);
+      if (data.success) {
+        localStorage.setItem("token", data.token);
+        alert(data.message);
+        navigate("/properties");
+      } else {
+        setError(data.message || "Google signup/login failed");
+      }
     } catch (err) {
       setError(err.message);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  },
+  onError: () => setError("Google login failed"),
+});
 
-  const handleGoogleSignup = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const profile = await userInfoRes.json();
-
-        const res = await fetch("https://zipacres.onrender.com/api/auth/google", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tokenId: tokenResponse.access_token }),
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          localStorage.setItem("token", data.token);
-          alert(data.message);
-          navigate("/properties");
-        } else {
-          setError(data.message || "Google signup/login failed");
-        }
-      } catch (err) {
-        setError(err.message);
-      }
-    },
-    onError: () => setError("Google login failed"),
-  });
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-gray-100 to-indigo-100 flex items-center justify-center p-4 py-8">
@@ -139,16 +162,23 @@ export default function Signup() {
       >
         <div className="text-center mb-4">
           <a href="/" className="mb-2 flex flex-col items-center">
-            <img src="/images/Zipacres Logo.png" alt="ZipAcres Logo" className="h-14 mb-1" />
+            <img
+              src="/images/Zipacres Logo.png"
+              alt="ZipAcres Logo"
+              className="h-14 mb-1"
+            />
           </a>
           <h1 className="text-3xl font-semibold text-gray-800">Create an Account</h1>
-          <p className="text-gray-500 mt-1 text-sm">Join us to find your perfect home.</p>
+          <p className="text-gray-500 mt-1 text-sm">
+            Join us to find your perfect home.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Role Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Sign up as</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Sign up as
+            </label>
             <div className="grid grid-cols-2 gap-2 rounded-lg bg-gray-200 p-1">
               {["user", "admin"].map((r) => (
                 <button
@@ -156,7 +186,9 @@ export default function Signup() {
                   type="button"
                   onClick={() => setRole(r)}
                   className={`w-full rounded-md py-2 text-sm font-semibold transition-all ${
-                    role === r ? "bg-white text-gray-800 shadow" : "bg-transparent text-gray-500"
+                    role === r
+                      ? "bg-white text-gray-800 shadow"
+                      : "bg-transparent text-gray-500"
                   }`}
                 >
                   {r.charAt(0).toUpperCase() + r.slice(1)}
@@ -165,7 +197,6 @@ export default function Signup() {
             </div>
           </div>
 
-          {/* Name, Email, Phone */}
           <input
             type="text"
             value={form.name}
@@ -202,7 +233,6 @@ export default function Signup() {
             />
           </div>
 
-          {/* Password */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
