@@ -65,6 +65,11 @@ export default function Signup() {
       return;
     }
 
+    if (role === "admin" && form.adminCode.trim() === "") {
+      setError("Admin code is required for admin signup.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -72,20 +77,19 @@ export default function Signup() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          name: form.name,
+          email: form.email,
+          password: form.password,
           role,
-          phoneNumber: form.countryCode + form.phone, // send as string
+          phoneNumber: form.countryCode + form.phone,
+          adminCode: form.adminCode,
         }),
       });
 
       const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.message || "Registration failed");
-      }
+      if (!data.success) throw new Error(data.message || "Registration failed");
 
-      // Save token
       localStorage.setItem("token", data.token);
-
       setSuccess("Registration successful! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
@@ -99,13 +103,9 @@ export default function Signup() {
   const handleGoogleSignup = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const userInfoRes = await fetch(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-          }
-        );
-
+        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
         const profile = await userInfoRes.json();
 
         const res = await fetch("https://zipacres.onrender.com/api/auth/google", {
@@ -119,11 +119,9 @@ export default function Signup() {
         });
 
         const data = await res.json();
-
         if (data.success) {
           localStorage.setItem("token", data.token);
-
-          alert(data.message); // Signup or login message
+          alert(data.message);
           navigate("/properties");
         } else {
           setError(data.message || "Google signup/login failed");
@@ -162,8 +160,9 @@ export default function Signup() {
                   key={r}
                   type="button"
                   onClick={() => setRole(r)}
-                  className={`w-full rounded-md py-2 text-sm font-semibold transition-all ${role === r ? "bg-white text-gray-800 shadow" : "bg-transparent text-gray-500"
-                    }`}
+                  className={`w-full rounded-md py-2 text-sm font-semibold transition-all ${
+                    role === r ? "bg-white text-gray-800 shadow" : "bg-transparent text-gray-500"
+                  }`}
                 >
                   {r.charAt(0).toUpperCase() + r.slice(1)}
                 </button>

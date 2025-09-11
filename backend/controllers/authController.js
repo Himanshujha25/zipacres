@@ -9,7 +9,7 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const ADMIN_CODE = process.env.ADMIN_CODE || "12345";
 
 if (!JWT_SECRET || !GOOGLE_CLIENT_ID || !ADMIN_CODE) {
-  throw new Error("Missing required environment variables");
+  throw new Error("Missing environment variables");
 }
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -24,9 +24,8 @@ exports.register = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    if (existingUser)
       return res.status(409).json({ success: false, message: "User already exists" });
-    }
 
     if (role === "admin" && adminCode !== ADMIN_CODE) {
       return res.status(403).json({ success: false, message: "Invalid admin code" });
@@ -39,7 +38,7 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      phoneNumber: phoneNumber || "", // store as string
+      phoneNumber: String(phoneNumber || ""), // ensure string
     });
 
     await newUser.save();
@@ -50,15 +49,14 @@ exports.register = async (req, res) => {
       success: true,
       message: "User registered successfully",
       token,
-      user: { 
-        id: newUser._id, 
-        name: newUser.name, 
-        email: newUser.email, 
-        role: newUser.role, 
-        phoneNumber: newUser.phoneNumber 
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        phoneNumber: newUser.phoneNumber,
       },
     });
-
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
@@ -69,72 +67,57 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password)
       return res.status(400).json({ success: false, message: "Email and password required" });
-    }
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid email or password" });
-    }
+    if (!user) return res.status(401).json({ success: false, message: "Invalid email or password" });
 
     const isMatch = await bcrypt.compare(password, user.password || "");
-    if (!isMatch) {
+    if (!isMatch)
       return res.status(401).json({ success: false, message: "Invalid email or password" });
-    }
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
 
-    return res.json({
+    res.json({
       success: true,
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role, phoneNumber: user.phoneNumber },
     });
-
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-// ================= Google Signup/Login =================
+// ================= Google Auth =================
 exports.googleAuth = async (req, res) => {
   try {
-    const { tokenId, email, name, phoneNumber } = req.body;
+    const { tokenId } = req.body;
 
-    let profileEmail = email;
-    let profileName = name;
-    let profilePhone = phoneNumber || "";
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
 
-    // Verify tokenId with Google if provided
-    if (tokenId) {
-      const ticket = await client.verifyIdToken({
-        idToken: tokenId,
-        audience: GOOGLE_CLIENT_ID,
-      });
-      const payload = ticket.getPayload();
-      profileEmail = payload.email;
-      profileName = payload.name;
-    }
-
-    // Check if user exists
-    let user = await User.findOne({ email: profileEmail });
+    let user = await User.findOne({ email: payload.email });
     let isNewUser = false;
 
     if (!user) {
       isNewUser = true;
       user = new User({
-        name: profileName,
-        email: profileEmail,
+        name: payload.name,
+        email: payload.email,
         password: null,
         role: "user",
-        phoneNumber: profilePhone, // store as string
+        phoneNumber: "", // default empty
       });
       await user.save();
     }
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
 
-    return res.json({
+    res.json({
       success: true,
       message: isNewUser ? "Signup successful" : "Login successful",
       token,
@@ -146,13 +129,7 @@ exports.googleAuth = async (req, res) => {
         phoneNumber: user.phoneNumber,
       },
     });
-
   } catch (error) {
-    console.error("Google Auth Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Google authentication failed",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Google auth failed", error: error.message });
   }
 };
