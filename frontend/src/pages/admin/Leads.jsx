@@ -23,17 +23,17 @@ export default function Leads() {
   const formatPhoneNumbers = (phoneData) => {
     // Handle both string and array formats
     let phoneNumbers = [];
-    
+
     if (Array.isArray(phoneData)) {
       phoneNumbers = phoneData.filter(num => num && num.trim());
     } else if (phoneData && typeof phoneData === 'string') {
       phoneNumbers = [phoneData.trim()];
     }
-    
+
     if (phoneNumbers.length === 0) {
       return <span className="text-gray-400 italic">No phone</span>;
     }
-    
+
     return (
       <div className="flex flex-col gap-1">
         {phoneNumbers.map((num, idx) => (
@@ -77,7 +77,7 @@ export default function Leads() {
         if (!Array.isArray(data)) {
           throw new Error("Invalid data format received");
         }
-        
+
         setUsers(data);
         const contactedMap = {};
         const notesMap = {};
@@ -176,8 +176,8 @@ export default function Leads() {
         view === "all"
           ? true
           : view === "contacted"
-          ? contacted[u._id]
-          : !contacted[u._id];
+            ? contacted[u._id]
+            : !contacted[u._id];
 
       return matchesSearch && matchView;
     });
@@ -212,11 +212,10 @@ export default function Leads() {
             <button
               key={tab}
               onClick={() => setView(tab)}
-              className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors font-medium text-xs sm:text-sm ${
-                view === tab
+              className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors font-medium text-xs sm:text-sm ${view === tab
                   ? "bg-blue-600 text-white shadow-md"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+                }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {tab !== "all" && (
@@ -238,9 +237,8 @@ export default function Leads() {
       {/* Message box */}
       {message && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg text-white font-semibold transition-transform transform text-sm sm:text-base ${
-            isError ? "bg-red-500" : "bg-green-500"
-          } animate-fade-in-down`}
+          className={`fixed top-4 right-4 z-50 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg text-white font-semibold transition-transform transform text-sm sm:text-base ${isError ? "bg-red-500" : "bg-green-500"
+            } animate-fade-in-down`}
         >
           {message}
         </div>
@@ -270,13 +268,12 @@ export default function Leads() {
                 {filtered.map((user, idx) => (
                   <tr
                     key={user._id}
-                    className={`transition-colors ${
-                      contacted[user._id]
+                    className={`transition-colors ${contacted[user._id]
                         ? "bg-green-50"
                         : idx % 2 === 0
-                        ? "bg-gray-50"
-                        : "bg-white"
-                    } hover:bg-blue-50`}
+                          ? "bg-gray-50"
+                          : "bg-white"
+                      } hover:bg-blue-50`}
                   >
                     <td className="px-3 py-4 font-bold text-gray-800 text-sm sm:text-base">
                       {user?.name || "No name"}
@@ -285,8 +282,9 @@ export default function Leads() {
                       {user?.email || "No email"}
                     </td>
                     <td className="px-3 py-4 text-blue-600 text-sm sm:text-base">
-                      {formatPhoneNumbers(user?.phoneNumber)}
+                      {formatPhoneNumbers(user?.phone)}
                     </td>
+
                     <td className="px-3 py-4 text-center">
                       <input
                         type="checkbox"
