@@ -38,7 +38,7 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      phone: Number(phone),
+      phone, // keep as string
     });
 
     await newUser.save();
@@ -127,7 +127,7 @@ exports.googleAuth = async (req, res) => {
         });
       }
 
-      const existingPhone = await User.findOne({ phone: Number(phone) });
+      const existingPhone = await User.findOne({ phone });
       if (existingPhone) {
         return res.status(409).json({ success: false, message: "Phone already exists" });
       }
@@ -137,7 +137,7 @@ exports.googleAuth = async (req, res) => {
         email: payload.email,
         password: null,
         role: "user",
-        phone: Number(phone),
+        phone, // keep as string
       });
 
       await user.save();
