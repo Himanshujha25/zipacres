@@ -12,7 +12,7 @@ export default function Leads() {
   const [message, setMessage] = useState(null);
   const [isError, setIsError] = useState(false);
 
-  const API_BASE = "http://localhost:5000/api";
+  const API_BASE = "https://zipacres.onrender.com/api";
 
   const showMessage = useCallback((msg, isErr = false) => {
     setMessage(msg);
