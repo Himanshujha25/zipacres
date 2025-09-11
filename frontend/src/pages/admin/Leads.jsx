@@ -282,7 +282,7 @@ export default function Leads() {
                       {user?.email || "No email"}
                     </td>
                     <td className="px-3 py-4 text-blue-600 text-sm sm:text-base">
-                      {formatPhoneNumbers(user?.phone)}
+                      {user?.phone || "No phone"}
                     </td>
 
                     <td className="px-3 py-4 text-center">
