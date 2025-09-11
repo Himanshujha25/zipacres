@@ -5,10 +5,22 @@ const User = require("../models/User");
 exports.getLeads = async (req, res) => {
   try {
     const leads = await User.find({ role: "user" })
-      .select("name email phoneNumber contacted note tags lastContactedAt") // <- use phoneNumber
+      .select("name email phoneNumber contacted note tags lastContactedAt")
       .sort({ createdAt: -1 });
 
-    res.json(leads);
+    // Normalize phoneNumber to show "No phone" if empty
+    const normalizedLeads = leads.map(u => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      phoneNumber: u.phoneNumber && u.phoneNumber.trim() !== "" ? u.phoneNumber : "No phone",
+      contacted: u.contacted,
+      note: u.note,
+      tags: u.tags,
+      lastContactedAt: u.lastContactedAt,
+    }));
+
+    res.json(normalizedLeads);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error fetching leads" });
@@ -30,16 +42,5 @@ exports.updateLead = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error updating lead" });
-  }
-};
-
-// DELETE /api/leads/:id
-exports.deleteLead = async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: "Lead deleted" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error deleting lead" });
   }
 };

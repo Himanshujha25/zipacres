@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { OAuth2Client } = require("google-auth-library");
 
-
 const JWT_SECRET = process.env.JWT_SECRET || "ZIPCARE";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const ADMIN_CODE = process.env.ADMIN_CODE || "12345";
@@ -15,16 +14,13 @@ if (!JWT_SECRET || !GOOGLE_CLIENT_ID || !ADMIN_CODE) {
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-// ========== Manual Register ==========
+// ================= Manual Register =================
 exports.register = async (req, res) => {
-
   try {
-  // in register:
-const { name, email, password, role, adminCode, phoneNumber } = req.body;
-
-// …
+    const { name, email, password, role, adminCode, phoneNumber } = req.body;
 
     console.log("Register request body:", req.body);
+
     if (!name || !email || !password || !role) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
@@ -41,12 +37,13 @@ const { name, email, password, role, adminCode, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-  name,
-  email,
-  password: hashedPassword,
-  role,
-  phoneNumber: Array.isArray(phoneNumber) ? phoneNumber : [phoneNumber]
-});
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      phoneNumber: phoneNumber ? (Array.isArray(phoneNumber) ? phoneNumber : [phoneNumber]) : []
+    });
+
     await newUser.save();
 
     const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "1d" });
@@ -57,15 +54,17 @@ const { name, email, password, role, adminCode, phoneNumber } = req.body;
       token,
       user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role },
     });
+
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-// ========== Manual Login ==========
+// ================= Manual Login =================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({ success: false, message: "Email and password required" });
     }
@@ -87,31 +86,26 @@ exports.login = async (req, res) => {
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
+
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-// ========== Google Signup/Login ==========
-
-
+// ================= Google Signup/Login =================
 exports.googleAuth = async (req, res) => {
   try {
-const { tokenId, email, name, phoneNumber } = req.body;
-
-
-
+    const { tokenId, email, name } = req.body;
 
     let profileEmail = email;
     let profileName = name;
 
-    // If using tokenId, verify with Google
+    // Verify tokenId with Google if provided
     if (tokenId) {
       const ticket = await client.verifyIdToken({
         idToken: tokenId,
-        audience: process.env.GOOGLE_CLIENT_ID,
+        audience: GOOGLE_CLIENT_ID,
       });
-
       const payload = ticket.getPayload();
       profileEmail = payload.email;
       profileName = payload.name;
@@ -122,22 +116,18 @@ const { tokenId, email, name, phoneNumber } = req.body;
     let isNewUser = false;
 
     if (!user) {
-  isNewUser = true;
-  user = new User({
-    name: profileName,
-    email: profileEmail,
-    password: null,
-    role: "user",
-    phoneNumber: Array.isArray(phoneNumber) ? phoneNumber : [phoneNumber]
-  });
-  await user.save();
-}
+      isNewUser = true;
+      user = new User({
+        name: profileName,
+        email: profileEmail,
+        password: null,
+        role: "user",
+        phoneNumber: [], // initialize as empty array
+      });
+      await user.save();
+    }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
 
     return res.json({
       success: true,
@@ -150,6 +140,7 @@ const { tokenId, email, name, phoneNumber } = req.body;
         role: user.role,
       },
     });
+
   } catch (error) {
     console.error("Google Auth Error:", error);
     return res.status(500).json({

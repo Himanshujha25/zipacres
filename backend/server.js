@@ -34,9 +34,13 @@ const propertyRoutes = require("./routes/property");
 const leadRoutes = require("./routes/leads");
 const authRoutes = require("./routes/auth");
 
+
+
 app.use("/api/properties", propertyRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/leads", leadRoutes);
+
+
 
 // Start server
 const PORT = process.env.PORT || 5000;

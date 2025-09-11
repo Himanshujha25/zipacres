@@ -9,7 +9,5 @@ router.get("/", protect, getLeads);
 // UPDATE a lead
 router.put("/:id", protect, updateLead);
 
-// DELETE a lead
-router.delete("/:id", protect, deleteLead);
 
 module.exports = router;

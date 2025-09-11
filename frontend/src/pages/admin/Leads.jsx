@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { debounce } from "lodash";
 
 export default function Leads() {
   const [users, setUsers] = useState([]);
@@ -7,59 +8,58 @@ export default function Leads() {
   const [contacted, setContacted] = useState({});
   const [notes, setNotes] = useState({});
   const [search, setSearch] = useState("");
-  const [view, setView] = useState("all"); // all | uncontacted | contacted
-
-  // State for custom alert/message box
+  const [view, setView] = useState("all");
   const [message, setMessage] = useState(null);
   const [isError, setIsError] = useState(false);
 
-  // State for custom confirmation modal
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [leadToDelete, setLeadToDelete] = useState(null);
+  const API_BASE = "http://localhost:5000/api";
 
-  // Helper function to show a custom message
   const showMessage = (msg, isErr = false) => {
     setMessage(msg);
     setIsError(isErr);
     setTimeout(() => setMessage(null), 3000);
   };
 
-  // Format phone numbers for professional display
-  const formatPhoneNumbers = (phoneString) => {
-    if (!phoneString || phoneString === "—") return "No phone";
-
-    // Split by comma and format each number
-    const numbers = phoneString.split(',').map(num => num.trim());
-
+  const formatPhoneNumbers = (phoneNumbers) => {
+    if (!phoneNumbers || phoneNumbers.length === 0) return "No phone";
     return (
       <div className="flex flex-col gap-1">
-        {numbers.map((number, index) => (
-          <div key={index} className="flex items-center">
+        {phoneNumbers.map((num, idx) => (
+          <div key={idx} className="flex items-center">
             <span className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-              <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-3 h-3 text-blue-600"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
               </svg>
             </span>
-            <span className="text-sm font-medium text-gray-700">{number}</span>
+            <span className="text-sm font-medium text-gray-700">{num}</span>
           </div>
         ))}
       </div>
     );
   };
 
-  // Fetch all leads on mount
+  const token = useMemo(() => localStorage.getItem("token"), []);
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch("https://zipacres.onrender.com/api/leads", {
+    if (!token) {
+      showMessage("Authentication token missing.", true);
+      setLoading(false);
+      return;
+    }
+
+    fetch(`${API_BASE}/leads`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch leads.");
+        if (!res.ok) throw new Error(`Failed to fetch leads (${res.status})`);
         return res.json();
       })
       .then((data) => {
         setUsers(data);
-        // Prefill contacted + notes maps
         const contactedMap = {};
         const notesMap = {};
         data.forEach((u) => {
@@ -74,110 +74,79 @@ export default function Leads() {
         showMessage("Error fetching leads.", true);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
-  // Toggle contacted checkbox
-  const handleContactedChange = (id) =>
-    setContacted((prev) => ({ ...prev, [id]: !prev[id] }));
-
-  // Update local note text
-  const handleNoteChange = (id, value) =>
-    setNotes((prev) => ({ ...prev, [id]: value }));
-
-  // Save contacted + note to backend
-  const handleSave = (userId) => {
+  // Save function for backend
+  const handleSave = (userId, contactedValue = contacted[userId], noteValue = notes[userId]) => {
     const token = localStorage.getItem("token");
-    fetch(`https://zipacres.onrender.com/api/leads/${userId}`, {
+    if (!token) return showMessage("Missing auth token", true);
+
+    const payload = {
+      contacted: contactedValue,
+      note: noteValue,
+      lastContactedAt: contactedValue ? new Date() : null,
+    };
+
+    fetch(`${API_BASE}/leads/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        contacted: contacted[userId],
-        note: notes[userId],
-      }),
+      body: JSON.stringify(payload),
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to save.");
+        if (!res.ok) throw new Error(`Failed to update lead (${res.status})`);
         return res.json();
       })
-      .then((updated) => {
-        // Update local users array too
+      .then((updatedLead) => {
         setUsers((prev) =>
-          prev.map((u) => (u._id === updated._id ? updated : u))
+          prev.map((u) => (u._id === userId ? updatedLead : u))
         );
         showMessage("Lead updated successfully!");
       })
-      .catch((error) => {
-        console.error("Error saving lead:", error);
-        showMessage("Error saving lead.", true);
+      .catch((err) => {
+        console.error("Error updating lead:", err);
+        showMessage("Error updating lead.", true);
       });
   };
 
-  // Open confirmation modal
-  const confirmDelete = (userId) => {
-    setLeadToDelete(userId);
-    setShowConfirm(true);
-  };
+  // Debounced note saving
+  const saveNoteDebounced = useMemo(
+    () => debounce((id, value) => handleSave(id, contacted[id], value), 500),
+    [contacted]
+  );
 
-  // Handle actual delete after confirmation
-  // Add this inside your component
-const handleDelete = () => {
-  if (!leadToDelete) return;
-
-  const token = localStorage.getItem("token");
-
-  fetch(`https://zipacres.onrender.com/api/leads/${leadId}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ id: leadToDelete }),
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to delete lead");
-      return res.json();
-    })
-    .then(() => {
-      // remove locally
-      setUsers((prev) => prev.filter((u) => u._id !== leadToDelete));
-      setContacted((prev) => {
-        const newState = { ...prev };
-        delete newState[leadToDelete];
-        return newState;
-      });
-      setNotes((prev) => {
-        const newState = { ...prev };
-        delete newState[leadToDelete];
-        return newState;
-      });
-      setLeadToDelete(null);
-      setShowConfirm(false);
-      showMessage("Lead deleted successfully!");
-    })
-    .catch((err) => {
-      console.error("Error deleting lead:", err);
-      showMessage("Error deleting lead.", true);
+  // Handle checkbox
+  const handleContactedChange = (id) => {
+    setContacted((prev) => {
+      const newStatus = !prev[id];
+      handleSave(id, newStatus, notes[id]); // Save immediately
+      return { ...prev, [id]: newStatus };
     });
-};
+  };
 
+  // Handle note change
+  const handleNoteChange = (id, value) => {
+    setNotes((prev) => ({ ...prev, [id]: value }));
+    saveNoteDebounced(id, value);
+  };
 
-
-  // filter by search + tab
+  // Filtered leads
   const filtered = users.filter((u) => {
-    const phoneString = u.phone || "";
+    const phoneString = u.phoneNumber || "";
     const matchesSearch =
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
       phoneString.toLowerCase().includes(search.toLowerCase());
+
     const matchView =
       view === "all"
         ? true
         : view === "contacted"
-          ? contacted[u._id]
-          : !contacted[u._id];
+        ? contacted[u._id]
+        : !contacted[u._id];
+
     return matchesSearch && matchView;
   });
 
@@ -210,10 +179,11 @@ const handleDelete = () => {
             <button
               key={tab}
               onClick={() => setView(tab)}
-              className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors font-medium text-xs sm:text-sm ${view === tab
+              className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors font-medium text-xs sm:text-sm ${
+                view === tab
                   ? "bg-blue-600 text-white shadow-md"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+              }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {tab !== "all" && (
@@ -232,23 +202,25 @@ const handleDelete = () => {
         </div>
       </div>
 
-      {/* Message box for success/error alerts */}
+      {/* Message box */}
       {message && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg text-white font-semibold transition-transform transform text-sm sm:text-base ${isError ? "bg-red-500" : "bg-green-500"
-            } animate-fade-in-down`}
+          className={`fixed top-4 right-4 z-50 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg text-white font-semibold transition-transform transform text-sm sm:text-base ${
+            isError ? "bg-red-500" : "bg-green-500"
+          } animate-fade-in-down`}
         >
           {message}
         </div>
       )}
 
+      {/* Leads Table */}
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <p className="ml-3 text-gray-500 text-lg">Loading leads…</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl sm:rounded-3xl shadow-lg sm:shadow-2xl overflow-hidden">
+        <div className="bg-white rounded-xl sm:rounded-3xl shadow-lg sm          :shadow-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-gray-700">
               <thead className="bg-gradient-to-r from-blue-800 to-blue-900 text-white">
@@ -265,27 +237,29 @@ const handleDelete = () => {
                 {filtered.map((user, idx) => (
                   <tr
                     key={user._id}
-                    className={`transition-colors ${contacted[user._id]
+                    className={`transition-colors ${
+                      contacted[user._id]
                         ? "bg-green-50"
                         : idx % 2 === 0
-                          ? "bg-gray-50"
-                          : "bg-white"
-                      } hover:bg-blue-50`}
+                        ? "bg-gray-50"
+                        : "bg-white"
+                    } hover:bg-blue-50`}
                   >
                     <td className="px-3 py-4 font-bold text-gray-800 text-sm sm:text-base">
-                      {user.name || "No name"}
+                      {user?.name || "No name"}
                     </td>
                     <td className="px-3 py-4 text-blue-600 text-sm sm:text-base">
-                      {user.email || "No email"}
+                      {user?.email || "No email"}
                     </td>
-
-                    <td className="px-3 py-4 text-sm sm:text-base">
-                      {Array.isArray(user.phoneNumber) && user.phoneNumber.length > 0
-                        ? user.phoneNumber.join(", ")
-                        : "No phone"}
+                    <td className="px-3 py-4 text-blue-600 text-sm sm:text-base">
+                      {formatPhoneNumbers(
+                        Array.isArray(user?.phoneNumber)
+                          ? user.phoneNumber
+                          : user?.phoneNumber
+                          ? [user.phoneNumber]
+                          : []
+                      )}
                     </td>
-
-
                     <td className="px-3 py-4 text-center">
                       <input
                         type="checkbox"
@@ -312,21 +286,12 @@ const handleDelete = () => {
                       >
                         Save
                       </button>
-                      <button
-                        onClick={() => confirmDelete(user._id)}
-                        className="px-2 py-1 sm:px-3 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm font-medium"
-                      >
-                        Delete
-                      </button>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td
-                      colSpan="6"
-                      className="px-4 py-12 text-center text-gray-500"
-                    >
+                    <td colSpan="6" className="px-4 py-12 text-center text-gray-500">
                       <div className="flex flex-col items-center">
                         <svg
                           className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mb-4"
@@ -355,58 +320,16 @@ const handleDelete = () => {
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-4 sm:p-6 w-full max-w-sm text-center transform scale-100 transition-transform animate-scale-in">
-            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Confirm Deletion</h3>
-            <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Are you sure you want to delete this lead?</p>
-            <div className="flex justify-center gap-3 sm:gap-4">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 sm:px-6 sm:py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm sm:text-base"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 sm:px-6 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm sm:text-base"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes fade-in-down {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
+      <style>
+        {`
+          @keyframes fade-in-down {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes scale-in {
-            from {
-                transform: scale(0.95);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        .animate-fade-in-down {
-          animation: fade-in-down 0.3s ease-out;
-        }
-        .animate-scale-in {
-            animation: scale-in 0.3s cubic-bezier(0.2, 0.5, 0.5, 1.2);
-        }
-      `}</style>
+          .animate-fade-in-down { animation: fade-in-down 0.3s ease-out; }
+        `}
+      </style>
     </div>
   );
 }
+

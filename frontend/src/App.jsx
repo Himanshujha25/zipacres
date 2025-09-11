@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/Protectedroute";
 import "./index.css"
 import Leads from "./pages/admin/Leads";
 
+
 const App = () => {
   return (
     <>
@@ -61,6 +62,7 @@ const App = () => {
           </ProtectedRoute>
         }
       />
+
       </Routes>
       <Footer />
     </>
