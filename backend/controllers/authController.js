@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      phoneNumber: phoneNumber || "",
+      phoneNumber: phoneNumber || "", // store as string
     });
 
     await newUser.save();
@@ -50,14 +50,19 @@ exports.register = async (req, res) => {
       success: true,
       message: "User registered successfully",
       token,
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role, phoneNumber: newUser.phoneNumber },
+      user: { 
+        id: newUser._id, 
+        name: newUser.name, 
+        email: newUser.email, 
+        role: newUser.role, 
+        phoneNumber: newUser.phoneNumber 
+      },
     });
 
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
-
 
 // ================= Manual Login =================
 exports.login = async (req, res) => {
@@ -83,7 +88,7 @@ exports.login = async (req, res) => {
     return res.json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, phoneNumber: user.phoneNumber },
     });
 
   } catch (error) {
@@ -94,10 +99,11 @@ exports.login = async (req, res) => {
 // ================= Google Signup/Login =================
 exports.googleAuth = async (req, res) => {
   try {
-    const { tokenId, email, name } = req.body;
+    const { tokenId, email, name, phoneNumber } = req.body;
 
     let profileEmail = email;
     let profileName = name;
+    let profilePhone = phoneNumber || "";
 
     // Verify tokenId with Google if provided
     if (tokenId) {
@@ -121,7 +127,7 @@ exports.googleAuth = async (req, res) => {
         email: profileEmail,
         password: null,
         role: "user",
-        phoneNumber: [], // initialize as empty array
+        phoneNumber: profilePhone, // store as string
       });
       await user.save();
     }
@@ -137,6 +143,7 @@ exports.googleAuth = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phoneNumber: user.phoneNumber,
       },
     });
 

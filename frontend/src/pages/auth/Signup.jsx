@@ -55,8 +55,8 @@ export default function Signup() {
     setError("");
     setSuccess("");
 
-    if (form.countryCode === "+91" && form.phone.length !== 10) {
-      setError("Please enter a valid 10-digit Indian mobile number.");
+    if (!/^\d{10}$/.test(form.phone)) {
+      setError("Please enter a valid 10-digit mobile number.");
       return;
     }
 
@@ -69,15 +69,14 @@ export default function Signup() {
 
     try {
       const res = await fetch("https://zipacres.onrender.com/api/auth/register", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    ...form,
-    role,
-    phoneNumber: form.countryCode + form.phone, // combine country code + number
-  }),
-});
-
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          role,
+          phoneNumber: form.countryCode + form.phone, // send as string
+        }),
+      });
 
       const data = await res.json();
       if (!data.success) {
@@ -96,54 +95,46 @@ export default function Signup() {
     }
   };
 
-  // ✅ Handle Google signup (placeholder)
-const handleGoogleSignup = useGoogleLogin({
-  onSuccess: async (tokenResponse) => {
-    try {
-      const userInfoRes = await fetch(
-        "https://www.googleapis.com/oauth2/v3/userinfo",
-        {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+  // ✅ Handle Google signup/login
+  const handleGoogleSignup = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const userInfoRes = await fetch(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          }
+        );
+
+        const profile = await userInfoRes.json();
+
+        const res = await fetch("https://zipacres.onrender.com/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tokenId: tokenResponse.access_token,
+            email: profile.email,
+            name: profile.name,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("token", data.token);
+
+          alert(data.message); // Signup or login message
+          navigate("/properties");
+        } else {
+          setError(data.message || "Google signup/login failed");
         }
-      );
-
-      const profile = await userInfoRes.json();
-
-      const res = await fetch("https://zipacres.onrender.com/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tokenId: tokenResponse.credential, // or access_token
-          email: profile.email,
-          name: profile.name,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        localStorage.setItem("token", data.token);
-
-        if (data.message === "Signup successful") {
-          alert("Google signup successful!");
-        } else if (data.message === "Login successful") {
-          alert("User already exists. Logged in successfully!");
-        }
-
-        navigate("/properties");
-      } else {
-        setError(data.message || "Google signup/login failed");
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
       }
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-    }
-  },
-  onError: () => setError("Google login failed"),
-});
-
-
-
+    },
+    onError: () => setError("Google login failed"),
+  });
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-gray-100 to-indigo-100 flex items-center justify-center p-4 py-8">
@@ -153,7 +144,6 @@ const handleGoogleSignup = useGoogleLogin({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Header */}
         <div className="text-center mb-4">
           <a href="/" className="mb-2 flex flex-col items-center">
             <img src="/images/Zipacres Logo.png" alt="ZipAcres Logo" className="h-14 mb-1" />
@@ -162,7 +152,6 @@ const handleGoogleSignup = useGoogleLogin({
           <p className="text-gray-500 mt-1 text-sm">Join us to find your perfect home.</p>
         </div>
 
-        {/* Signup Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Role Selection */}
           <div>
@@ -182,27 +171,23 @@ const handleGoogleSignup = useGoogleLogin({
             </div>
           </div>
 
-          {/* Full Name */}
+          {/* Inputs */}
           <input
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
             placeholder="John Doe"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
             required
           />
-
-          {/* Email */}
           <input
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
             placeholder="you@example.com"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
             required
           />
-
-          {/* Phone */}
           <div className="flex">
             <select
               value={form.countryCode}
@@ -217,20 +202,19 @@ const handleGoogleSignup = useGoogleLogin({
               type="tel"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full px-4 py-3 rounded-r-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
               placeholder="9876543210"
+              className="w-full px-4 py-3 rounded-r-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
-          {/* Password */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
               placeholder="Enter strong password"
+              className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
               required
             />
             <button
@@ -242,28 +226,17 @@ const handleGoogleSignup = useGoogleLogin({
             </button>
           </div>
 
-          {/* Admin Code (only for admin) */}
-          <AnimatePresence>
-            {role === "admin" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <input
-                  type="password"
-                  value={form.adminCode}
-                  onChange={(e) => setForm({ ...form, adminCode: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter admin verification code"
-                  required
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {role === "admin" && (
+            <input
+              type="password"
+              value={form.adminCode}
+              onChange={(e) => setForm({ ...form, adminCode: e.target.value })}
+              placeholder="Enter admin verification code"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          )}
 
-          {/* Submit */}
           <motion.button
             type="submit"
             disabled={isLoading}
@@ -279,7 +252,6 @@ const handleGoogleSignup = useGoogleLogin({
           </motion.button>
         </form>
 
-        {/* Google Signup */}
         <button
           onClick={() => handleGoogleSignup()}
           className="mt-4 w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-3 text-sm font-medium hover:bg-gray-50"
@@ -292,8 +264,6 @@ const handleGoogleSignup = useGoogleLogin({
           Sign up with Google
         </button>
 
-
-        {/* Error */}
         <AnimatePresence>
           {error && (
             <motion.p
@@ -305,10 +275,6 @@ const handleGoogleSignup = useGoogleLogin({
               {error}
             </motion.p>
           )}
-        </AnimatePresence>
-
-        {/* Success */}
-        <AnimatePresence>
           {success && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -321,7 +287,6 @@ const handleGoogleSignup = useGoogleLogin({
           )}
         </AnimatePresence>
 
-        {/* Redirect */}
         <p className="text-center text-sm text-gray-600 mt-4">
           Already have an account?{" "}
           <a href="/login" className="text-blue-900 hover:text-blue-950 font-semibold">
