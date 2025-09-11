@@ -46,25 +46,26 @@ export default function Signup() {
   const navigate = useNavigate();
 
   // ✅ Basic password strength check
-  const isStrongPassword = (pwd) => {
-    return pwd.length >= 6 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
-  };
+  const isStrongPassword = (pwd) => pwd.length >= 6 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
+    // Phone validation: 10 digits
     if (!/^\d{10}$/.test(form.phone)) {
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
 
+    // Password strength
     if (!isStrongPassword(form.password)) {
       setError("Password must be at least 6 chars, with 1 uppercase & 1 number.");
       return;
     }
 
+    // Admin code check
     if (role === "admin" && form.adminCode.trim() === "") {
       setError("Admin code is required for admin signup.");
       return;
@@ -81,7 +82,7 @@ export default function Signup() {
           email: form.email,
           password: form.password,
           role,
-          phoneNumber: form.countryCode + form.phone,
+          phoneNumber: form.countryCode + form.phone, // send as phoneNumber
           adminCode: form.adminCode,
         }),
       });
@@ -99,7 +100,6 @@ export default function Signup() {
     }
   };
 
-  // ✅ Handle Google signup/login
   const handleGoogleSignup = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
@@ -111,11 +111,7 @@ export default function Signup() {
         const res = await fetch("https://zipacres.onrender.com/api/auth/google", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            tokenId: tokenResponse.access_token,
-            email: profile.email,
-            name: profile.name,
-          }),
+          body: JSON.stringify({ tokenId: tokenResponse.access_token }),
         });
 
         const data = await res.json();
@@ -127,7 +123,6 @@ export default function Signup() {
           setError(data.message || "Google signup/login failed");
         }
       } catch (err) {
-        console.error(err);
         setError(err.message);
       }
     },
@@ -170,7 +165,7 @@ export default function Signup() {
             </div>
           </div>
 
-          {/* Inputs */}
+          {/* Name, Email, Phone */}
           <input
             type="text"
             value={form.name}
@@ -207,6 +202,7 @@ export default function Signup() {
             />
           </div>
 
+          {/* Password */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}

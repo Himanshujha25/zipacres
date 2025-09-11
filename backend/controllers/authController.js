@@ -8,10 +8,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "ZIPCARE";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const ADMIN_CODE = process.env.ADMIN_CODE || "12345";
 
-if (!JWT_SECRET || !GOOGLE_CLIENT_ID || !ADMIN_CODE) {
-  throw new Error("Missing environment variables");
-}
-
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ================= Manual Register =================
@@ -19,13 +15,14 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, role, adminCode, phoneNumber } = req.body;
 
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+    if (!name || !email || !password || !role || !phoneNumber) {
+      return res.status(400).json({ success: false, message: "All fields including phone number are required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    // Check for duplicate email or phoneNumber
+    const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
     if (existingUser)
-      return res.status(409).json({ success: false, message: "User already exists" });
+      return res.status(409).json({ success: false, message: "Email or Phone number already exists" });
 
     if (role === "admin" && adminCode !== ADMIN_CODE) {
       return res.status(403).json({ success: false, message: "Invalid admin code" });
@@ -38,7 +35,7 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      phoneNumber: String(phoneNumber || ""), // ensure string
+      phoneNumber: String(phoneNumber),
     });
 
     await newUser.save();
@@ -66,7 +63,6 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password)
       return res.status(400).json({ success: false, message: "Email and password required" });
 
@@ -93,11 +89,7 @@ exports.login = async (req, res) => {
 exports.googleAuth = async (req, res) => {
   try {
     const { tokenId } = req.body;
-
-    const ticket = await client.verifyIdToken({
-      idToken: tokenId,
-      audience: GOOGLE_CLIENT_ID,
-    });
+    const ticket = await client.verifyIdToken({ idToken: tokenId, audience: GOOGLE_CLIENT_ID });
     const payload = ticket.getPayload();
 
     let user = await User.findOne({ email: payload.email });
@@ -110,7 +102,7 @@ exports.googleAuth = async (req, res) => {
         email: payload.email,
         password: null,
         role: "user",
-        phoneNumber: "", // default empty
+        phoneNumber: "", // You can prompt user to add later
       });
       await user.save();
     }
