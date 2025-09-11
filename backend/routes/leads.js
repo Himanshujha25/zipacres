@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { getLeads, updateLead,deleteLead } = require("../controllers/leads");
+const { getLeads, updateLead, deleteLead } = require("../controllers/leads");
 const { protect } = require("../middleware/auth");
 
+// GET all leads
 router.get("/", protect, getLeads);
-router.put("/:id", protect, updateLead);
-router.delete("/delete", protect, deleteLead);
 
+// UPDATE a lead
+router.put("/:id", protect, updateLead);
+
+// DELETE a lead
+router.delete("/:id", protect, deleteLead);
 
 module.exports = router;

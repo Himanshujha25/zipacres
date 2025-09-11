@@ -122,40 +122,48 @@ export default function Leads() {
   };
 
   // Handle actual delete after confirmation
-  const handleDelete = () => {
-    const userId = leadToDelete;
-    const token = localStorage.getItem("token");
-    setShowConfirm(false); // Close the modal
-    setLeadToDelete(null);
+  // Add this inside your component
+const handleDelete = () => {
+  if (!leadToDelete) return;
 
-    fetch(`https://zipacres.onrender.com/api/leads/${userId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
+  const token = localStorage.getItem("token");
+
+  fetch(`https://zipacres.onrender.com/api/leads/${leadId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ id: leadToDelete }),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to delete lead");
+      return res.json();
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to delete.");
-        return res.json();
-      })
-      .then(() => {
-        setUsers((prev) => prev.filter((u) => u._id !== userId));
-        // Clean up state
-        setContacted((prev) => {
-          const newState = { ...prev };
-          delete newState[userId];
-          return newState;
-        });
-        setNotes((prev) => {
-          const newState = { ...prev };
-          delete newState[userId];
-          return newState;
-        });
-        showMessage("Lead deleted successfully!");
-      })
-      .catch((error) => {
-        console.error("Error deleting lead:", error);
-        showMessage("Error deleting lead.", true);
+    .then(() => {
+      // remove locally
+      setUsers((prev) => prev.filter((u) => u._id !== leadToDelete));
+      setContacted((prev) => {
+        const newState = { ...prev };
+        delete newState[leadToDelete];
+        return newState;
       });
-  };
+      setNotes((prev) => {
+        const newState = { ...prev };
+        delete newState[leadToDelete];
+        return newState;
+      });
+      setLeadToDelete(null);
+      setShowConfirm(false);
+      showMessage("Lead deleted successfully!");
+    })
+    .catch((err) => {
+      console.error("Error deleting lead:", err);
+      showMessage("Error deleting lead.", true);
+    });
+};
+
+
 
   // filter by search + tab
   const filtered = users.filter((u) => {
