@@ -69,10 +69,15 @@ export default function Signup() {
 
     try {
       const res = await fetch("https://zipacres.onrender.com/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, role }),
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    ...form,
+    role,
+    phoneNumber: form.countryCode + form.phone, // combine country code + number
+  }),
+});
+
 
       const data = await res.json();
       if (!data.success) {

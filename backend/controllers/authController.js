@@ -19,8 +19,6 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, role, adminCode, phoneNumber } = req.body;
 
-    console.log("Register request body:", req.body);
-
     if (!name || !email || !password || !role) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
@@ -41,24 +39,25 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      phoneNumber: phoneNumber ? (Array.isArray(phoneNumber) ? phoneNumber : [phoneNumber]) : []
+      phoneNumber: phoneNumber || "",
     });
 
     await newUser.save();
 
     const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "1d" });
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "User registered successfully",
       token,
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role },
+      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role, phoneNumber: newUser.phoneNumber },
     });
 
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
 
 // ================= Manual Login =================
 exports.login = async (req, res) => {
