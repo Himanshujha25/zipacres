@@ -10,15 +10,16 @@ exports.getLeads = async (req, res) => {
 
     // Normalize phoneNumber to show "No phone" if empty
     const normalizedLeads = leads.map(u => ({
-      _id: u._id,
-      name: u.name,
-      email: u.email,
-      phoneNumber: u.phoneNumber && u.phoneNumber.trim() !== "" ? u.phoneNumber : "No phone",
-      contacted: u.contacted,
-      note: u.note,
-      tags: u.tags,
-      lastContactedAt: u.lastContactedAt,
-    }));
+  _id: u._id,
+  name: u.name,
+  email: u.email,
+  phoneNumber: u.phone ? u.phone.toString() : "", // Number → String
+  contacted: u.contacted,
+  note: u.note,
+  tags: u.tags,
+  lastContactedAt: u.lastContactedAt,
+}));
+
 
     res.json(normalizedLeads);
   } catch (err) {
