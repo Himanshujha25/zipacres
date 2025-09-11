@@ -15,20 +15,34 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, role, adminCode, phone } = req.body;
 
+    // ✅ Early validation
     if (!name || !email || !password || !role || !phone) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
     if (role === "admin" && adminCode !== ADMIN_CODE) {
-      return res.status(403).json({ success: false, message: "Invalid admin code" });
+      return res
+        .status(403)
+        .json({ success: false, message: "Invalid admin code" });
     }
 
-    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    // ✅ Uniqueness check
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phone }],
+    });
     if (existingUser) {
-      if (existingUser.email === email)
-        return res.status(409).json({ success: false, message: "Email already exists" });
-      if (existingUser.phone === phone)
-        return res.status(409).json({ success: false, message: "Phone already exists" });
+      if (existingUser.email === email) {
+        return res
+          .status(409)
+          .json({ success: false, message: "Email already exists" });
+      }
+      if (existingUser.phone === phone) {
+        return res
+          .status(409)
+          .json({ success: false, message: "Phone already exists" });
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -41,9 +55,14 @@ exports.register = async (req, res) => {
       phone, // keep as string
     });
 
+    await newUser.validate(); // ✅ ensure validation passes before saving
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign(
+      { id: newUser._id, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
     res.status(201).json({
       success: true,
@@ -59,11 +78,20 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error);
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ success: false, message: error.message });
+    }
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
-      return res.status(409).json({ success: false, message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` });
+      return res
+        .status(409)
+        .json({ success: false, message: `${field} already exists` });
     }
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -73,20 +101,28 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: "Email and password required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password required" });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid email or password" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password || "");
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid email or password" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
     res.json({
       success: true,
@@ -101,7 +137,9 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -110,7 +148,10 @@ exports.googleAuth = async (req, res) => {
   try {
     const { tokenId, phone } = req.body; // Accept phone for new users
 
-    const ticket = await client.verifyIdToken({ idToken: tokenId, audience: GOOGLE_CLIENT_ID });
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: GOOGLE_CLIENT_ID,
+    });
     const payload = ticket.getPayload();
 
     let user = await User.findOne({ email: payload.email });
@@ -129,7 +170,9 @@ exports.googleAuth = async (req, res) => {
 
       const existingPhone = await User.findOne({ phone });
       if (existingPhone) {
-        return res.status(409).json({ success: false, message: "Phone already exists" });
+        return res
+          .status(409)
+          .json({ success: false, message: "Phone already exists" });
       }
 
       user = new User({
@@ -137,13 +180,16 @@ exports.googleAuth = async (req, res) => {
         email: payload.email,
         password: null,
         role: "user",
-        phone, // keep as string
+        phone, // string
       });
 
+      await user.validate();
       await user.save();
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
     res.json({
       success: true,
@@ -159,10 +205,26 @@ exports.googleAuth = async (req, res) => {
     });
   } catch (error) {
     console.error("Google auth error:", error);
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ success: false, message: error.message });
+    }
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
-      return res.status(409).json({ success: false, message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` });
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`,
+        });
     }
-    res.status(500).json({ success: false, message: "Google auth failed", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Google auth failed",
+        error: error.message,
+      });
   }
 };
