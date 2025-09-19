@@ -95,50 +95,46 @@ exports.register = async (req, res) => {
   }
 };
 
-// ================= Manual Login =================
+
 // ================= Manual Login =================
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, countryCode } = req.body; // Accept country code if needed
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password required" });
+      return res.status(400).json({ success: false, message: "Email and password required" });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password || "");
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
 
     // ================= Send data to CRM =================
     try {
+      const payload = {
+        Name: user.name,                      // Adjust field names according to CRM
+        Email: user.email,
+        MobileNumber: countryCode ? `${countryCode}${user.phone}` : user.phone, // e.g., +91xxxxxxx
+        Message: "User login from Zipacres app",
+      };
+
+      console.log("CRM payload:", payload);
+
       const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "API-Key": process.env.CRM_API_KEY, // move your key to .env
+          "API-Key": process.env.CRM_API_KEY,
         },
-        body: JSON.stringify({
-          Name: user.name,
-          MobileNumber: user.phone,
-          Email: user.email,
-          Message: "User login from Zipacres app",
-        }),
+        body: JSON.stringify(payload),
       });
 
       const crmData = await crmRes.json();
@@ -151,6 +147,7 @@ exports.login = async (req, res) => {
       console.error("Error sending to CRM API:", crmErr);
     }
 
+    // ================= Send response =================
     res.json({
       success: true,
       token,
@@ -164,9 +161,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
