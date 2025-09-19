@@ -96,6 +96,7 @@ exports.register = async (req, res) => {
 };
 
 // ================= Manual Login =================
+// ================= Manual Login =================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -124,6 +125,32 @@ exports.login = async (req, res) => {
       expiresIn: "1d",
     });
 
+    // ================= Send data to CRM =================
+    try {
+      const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "API-Key": process.env.CRM_API_KEY, // move your key to .env
+        },
+        body: JSON.stringify({
+          Name: user.name,
+          MobileNumber: user.phone,
+          Email: user.email,
+          Message: "User login from Zipacres app",
+        }),
+      });
+
+      const crmData = await crmRes.json();
+      if (crmData.Success) {
+        console.log("CRM saved:", crmData.Message);
+      } else {
+        console.error("CRM API failed:", crmData.Message);
+      }
+    } catch (crmErr) {
+      console.error("Error sending to CRM API:", crmErr);
+    }
+
     res.json({
       success: true,
       token,
@@ -142,6 +169,7 @@ exports.login = async (req, res) => {
       .json({ success: false, message: "Server error", error: error.message });
   }
 };
+
 
 // ================= Google Auth =================
 exports.googleAuth = async (req, res) => {
