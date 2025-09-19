@@ -118,34 +118,44 @@ exports.login = async (req, res) => {
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
 
     // ================= Send data to CRM =================
-    try {
-      const payload = {
-        Name: user.name,                      // Adjust field names according to CRM
-        Email: user.email,
-        MobileNumber: countryCode ? `${countryCode}${user.phone}` : user.phone, // e.g., +91xxxxxxx
-        Message: "User login from Zipacres app",
-      };
+   try {
+  // Ensure phone number starts with + and country code is added if provided
+  let phoneNumber = user.phone || "";
+  if (countryCode) {
+    phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${countryCode}${phoneNumber}`;
+  }
 
-      console.log("CRM payload:", payload);
+  const payload = {
+    Name: user.name || "",        // Make sure name exists
+    Email: user.email || "",      // Make sure email exists
+    MobileNumber: phoneNumber,    // Corrected phone number
+    Message: "User login from Zipacres app",
+  };
 
-      const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "API-Key": process.env.CRM_API_KEY,
-        },
-        body: JSON.stringify(payload),
-      });
+  console.log("CRM payload:", payload);
 
-      const crmData = await crmRes.json();
-      if (crmData.Success) {
-        console.log("CRM saved:", crmData.Message);
-      } else {
-        console.error("CRM API failed:", crmData.Message);
-      }
-    } catch (crmErr) {
-      console.error("Error sending to CRM API:", crmErr);
-    }
+  const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "API-Key": process.env.CRM_API_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const crmData = await crmRes.json();
+
+  console.log("CRM Response:", crmData); // Log full response for debugging
+
+  if (crmData.Success) {
+    console.log("CRM saved successfully:", crmData.Message);
+  } else {
+    console.error("CRM API failed:", crmData.Message || "Unknown error");
+  }
+} catch (crmErr) {
+  console.error("Error sending to CRM API:", crmErr);
+}
+
 
     // ================= Send response =================
     res.json({
