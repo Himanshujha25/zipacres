@@ -11,37 +11,26 @@ const ADMIN_CODE = process.env.ADMIN_CODE || "12345";
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ================= Manual Register =================
+
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role, adminCode, phone } = req.body;
+    const { name, email, password, role, adminCode, phone, countryCode } = req.body;
 
-    // ✅ Early validation
     if (!name || !email || !password || !role || !phone) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
+      return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
     if (role === "admin" && adminCode !== ADMIN_CODE) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Invalid admin code" });
+      return res.status(403).json({ success: false, message: "Invalid admin code" });
     }
 
-    // ✅ Uniqueness check
-    const existingUser = await User.findOne({
-      $or: [{ email }, { phone }],
-    });
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
       if (existingUser.email === email) {
-        return res
-          .status(409)
-          .json({ success: false, message: "Email already exists" });
+        return res.status(409).json({ success: false, message: "Email already exists" });
       }
       if (existingUser.phone === phone) {
-        return res
-          .status(409)
-          .json({ success: false, message: "Phone already exists" });
+        return res.status(409).json({ success: false, message: "Phone already exists" });
       }
     }
 
@@ -52,11 +41,33 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      phone, // keep as string
+      phone,
     });
 
-    await newUser.validate(); // ✅ ensure validation passes before saving
+    await newUser.validate();
     await newUser.save();
+
+    // === CRM integration after signup ===
+    try {
+      const crmPayload = {
+        Name: newUser.name,
+        Email: newUser.email,
+        MobileNumber: countryCode ? `${countryCode}${newUser.phone}` : newUser.phone,
+        Message: "User signup from Zipacres app",
+      };
+
+      const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(crmPayload),
+      });
+
+      const crmData = await crmRes.json();
+      console.log("CRM response:", crmData);
+    } catch (crmErr) {
+      console.error("CRM integration error:", crmErr.message);
+      // don’t block signup if CRM fails, just log it
+    }
 
     const token = jwt.sign(
       { id: newUser._id, role: newUser.role },
@@ -79,21 +90,16 @@ exports.register = async (req, res) => {
   } catch (error) {
     console.error("Registration error:", error);
     if (error.name === "ValidationError") {
-      return res
-        .status(400)
-        .json({ success: false, message: error.message });
+      return res.status(400).json({ success: false, message: error.message });
     }
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
-      return res
-        .status(409)
-        .json({ success: false, message: `${field} already exists` });
+      return res.status(409).json({ success: false, message: `${field} already exists` });
     }
-    res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
 
 
 // ================= Manual Login =================
@@ -117,44 +123,6 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
 
-    // ================= Send data to CRM =================
-   try {
-  // Ensure phone number starts with + and country code is added if provided
-  let phoneNumber = user.phone || "";
-  if (countryCode) {
-    phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${countryCode}${phoneNumber}`;
-  }
-
-  const payload = {
-    Name: user.name || "",        // Make sure name exists
-    Email: user.email || "",      // Make sure email exists
-    MobileNumber: phoneNumber,    // Corrected phone number
-    Message: "User login from Zipacres app",
-  };
-
-  console.log("CRM payload:", payload);
-
-  const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "API-Key": process.env.CRM_API_KEY,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const crmData = await crmRes.json();
-
-  console.log("CRM Response:", crmData); // Log full response for debugging
-
-  if (crmData.Success) {
-    console.log("CRM saved successfully:", crmData.Message);
-  } else {
-    console.error("CRM API failed:", crmData.Message || "Unknown error");
-  }
-} catch (crmErr) {
-  console.error("Error sending to CRM API:", crmErr);
-}
 
 
     // ================= Send response =================

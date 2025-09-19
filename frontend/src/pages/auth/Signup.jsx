@@ -121,10 +121,10 @@ export default function Signup() {
       setError("Admin code is required for admin signup.");
       return;
     }
-    if (!isVerified) {
-      setError("Verify your phone number first.");
-      return;
-    }
+    // if (!isVerified) {
+    //   setError("Verify your phone number first.");
+    //   return;
+    // }
 
     setIsLoading(true);
     try {
@@ -153,39 +153,9 @@ if (!data.success) throw new Error(data.message || "Registration failed");
 localStorage.setItem("token", data.token);
 setSuccess("Registration successful! Redirecting to login...");
 
-// 🚀 Send data to CRM API
-try {
-  const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "API-Key": "d8QF1yV7D3NfMZJk1O+6n3r3xM0pHqVw+TfJdD6TzXw=",
-    },
-    body: JSON.stringify({
-      Name: form.name,
-      MobileNumber: form.countryCode + form.phone,
-      Email: form.email,
-      Message: "New signup from Zipacres app",
-    }),
-  });
-
-  const crmData = await crmRes.json();
-  if (crmData.Success) {
-    console.log("CRM saved:", crmData.Message);
-  } else {
-    console.error("CRM API failed:", crmData.Message);
-  }
-} catch (crmErr) {
-  console.error("Error sending to CRM API:", crmErr);
-}
-
 // then redirect
 setTimeout(() => navigate("/login"), 2000);
 
-
-      localStorage.setItem("token", data.token);
-      setSuccess("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -445,7 +415,7 @@ setTimeout(() => navigate("/login"), 2000);
 
           <motion.button
             type="submit"
-            disabled={isLoading || !isVerified}
+            disabled={isLoading}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="w-full bg-[#0A2540] text-white font-bold py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 mt-2 flex items-center justify-center"
