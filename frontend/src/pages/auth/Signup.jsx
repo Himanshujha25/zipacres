@@ -38,10 +38,16 @@ export default function Signup() {
     countryCode: "+91",
     adminCode: "",
   });
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // OTP state
+  const [otp, setOtp] = useState("");
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   const navigate = useNavigate();
 
@@ -49,6 +55,49 @@ export default function Signup() {
   const isStrongPassword = (pwd) =>
     pwd.length >= 6 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
 
+  // ---- OTP ----
+  const handleSendOtp = async () => {
+    if (!/^\d{10}$/.test(form.phone)) {
+      setError("Enter a valid 10-digit mobile number first.");
+      return;
+    }
+    try {
+      await fetch("https://zipacres.onrender.com/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: form.countryCode + form.phone }),
+      });
+      setIsOtpSent(true);
+      setError("");
+      setSuccess("OTP sent to your phone.");
+    } catch {
+      setError("Failed to send OTP.");
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      const res = await fetch("https://zipacres.onrender.com/api/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: form.countryCode + form.phone,
+          otp,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsVerified(true);
+        setSuccess("Phone verified.");
+      } else {
+        setError("Invalid OTP.");
+      }
+    } catch {
+      setError("Verification failed.");
+    }
+  };
+
+  // ---- submit ----
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -58,16 +107,22 @@ export default function Signup() {
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
-
     if (!isStrongPassword(form.password)) {
       setError(
         "Password must be at least 6 chars, with 1 uppercase & 1 number."
       );
       return;
     }
-
+    if (form.password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     if (role === "admin" && form.adminCode.trim() === "") {
       setError("Admin code is required for admin signup.");
+      return;
+    }
+    if (!isVerified) {
+      setError("Verify your phone number first.");
       return;
     }
 
@@ -83,7 +138,7 @@ export default function Signup() {
             email: form.email,
             password: form.password,
             role,
-            phone: form.countryCode + form.phone, // always send as string
+            phone: form.countryCode + form.phone,
             adminCode: form.adminCode,
           }),
         }
@@ -91,6 +146,42 @@ export default function Signup() {
 
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Registration failed");
+
+      // after your registration success
+if (!data.success) throw new Error(data.message || "Registration failed");
+
+localStorage.setItem("token", data.token);
+setSuccess("Registration successful! Redirecting to login...");
+
+// 🚀 Send data to CRM API
+try {
+  const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "API-Key": "d8QF1yV7D3NfMZJk1O+6n3r3xM0pHqVw+TfJdD6TzXw=",
+    },
+    body: JSON.stringify({
+      Name: form.name,
+      MobileNumber: form.countryCode + form.phone,
+      Email: form.email,
+      Message: "New signup from Zipacres app",
+    }),
+  });
+
+  const crmData = await crmRes.json();
+  if (crmData.Success) {
+    console.log("CRM saved:", crmData.Message);
+  } else {
+    console.error("CRM API failed:", crmData.Message);
+  }
+} catch (crmErr) {
+  console.error("Error sending to CRM API:", crmErr);
+}
+
+// then redirect
+setTimeout(() => navigate("/login"), 2000);
+
 
       localStorage.setItem("token", data.token);
       setSuccess("Registration successful! Redirecting to login...");
@@ -124,7 +215,6 @@ export default function Signup() {
             return;
           }
         }
-
         const fullPhone = form.countryCode + phone;
 
         const res = await fetch(
@@ -138,7 +228,6 @@ export default function Signup() {
             }),
           }
         );
-
         const data = await res.json();
         if (data.success) {
           localStorage.setItem("token", data.token);
@@ -179,6 +268,7 @@ export default function Signup() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* role */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Sign up as
@@ -201,6 +291,7 @@ export default function Signup() {
             </div>
           </div>
 
+          {/* name */}
           <input
             type="text"
             value={form.name}
@@ -209,6 +300,7 @@ export default function Signup() {
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
             required
           />
+          {/* email */}
           <input
             type="email"
             value={form.email}
@@ -218,28 +310,98 @@ export default function Signup() {
             required
           />
 
-          <div className="flex">
-            <select
-              value={form.countryCode}
-              onChange={(e) =>
-                setForm({ ...form, countryCode: e.target.value })
-              }
-              className="rounded-l-lg border-r-0 border border-gray-300 bg-gray-50 px-2"
-            >
-              <option>+91</option>
-              <option>+1</option>
-              <option>+44</option>
-            </select>
-            <input
-              type="tel"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              placeholder="9876543210"
-              className="w-full px-4 py-3 rounded-r-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+          {/* phone + send otp */}
+         {/* phone + send otp */}
+<div className="flex">
+  <select
+    value={form.countryCode}
+    onChange={(e) => setForm({ ...form, countryCode: e.target.value })}
+    className="rounded-l-lg border-r-0 border border-gray-300 bg-gray-50 px-2"
+    disabled={isOtpSent} 
+  >
+    <option>+91</option>
+    <option>+1</option>
+    <option>+44</option>
+  </select>
+  <input
+    type="tel"
+    value={form.phone}
+    onChange={(e) => {
+      setForm({ ...form, phone: e.target.value });
+      setIsVerified(false);
+    }}
+    placeholder="9876543210"
+    className="w-full px-4 py-3 rounded-r-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+    required
+    disabled={isOtpSent} // disable after sending OTP
+  />
+  <button
+    type="button"
+    onClick={handleSendOtp}
+    className="ml-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
+  >
+    {isOtpSent ? "Resend OTP" : "Send OTP"}
+  </button>
+</div>
 
+
+          {/* otp input */}
+    {isOtpSent && (
+  <div className="mt-3 bg-white/40 backdrop-blur-md p-4 rounded-xl shadow-lg">
+    <label htmlFor="otp" className="block text-gray-700 text-sm mb-2">
+      Enter the 6-digit code we sent
+    </label>
+    <div className="flex space-x-2">
+      <input
+        id="otp"
+        type="text"            /* show digits normally */
+        inputMode="numeric"
+        pattern="[0-9]*"
+        maxLength={6}
+        value={otp}
+        onChange={(e) => {
+          const v = e.target.value.replace(/\D/g, '');
+          setOtp(v);
+        }}
+        placeholder="0 0 0 0 0 0"
+        className="
+          flex-1 
+          px-6 py-4 
+          rounded-lg 
+          border border-gray-300 
+          focus:outline-none focus:ring-2 focus:ring-blue-500
+          tracking-[1em] /* spaces characters */
+          text-center text-lg font-mono /* mono font like OTP boxes */
+        "
+      />
+      <button
+        type="button"
+        onClick={handleVerifyOtp}
+        disabled={otp.length !== 6}
+        className={`px-4 py-3 rounded-lg text-white text-sm transition-colors 
+          ${otp.length === 6 
+            ? 'bg-green-600 hover:bg-green-700' 
+            : 'bg-gray-400 cursor-not-allowed'}`}
+      >
+        Verify
+      </button>
+    </div>
+  </div>
+)}
+
+{isVerified && (
+  <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none"
+      viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+    Phone verified
+  </p>
+)}
+
+
+
+          {/* password */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -258,6 +420,16 @@ export default function Signup() {
             </button>
           </div>
 
+          {/* confirm password */}
+          <input
+            type={showPassword ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm password"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
           {role === "admin" && (
             <input
               type="password"
@@ -273,7 +445,7 @@ export default function Signup() {
 
           <motion.button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isVerified}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="w-full bg-[#0A2540] text-white font-bold py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 mt-2 flex items-center justify-center"

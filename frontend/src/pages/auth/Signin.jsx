@@ -60,6 +60,31 @@ export default function Signin() {
       setUser({ ...data.user, token: data.token });
       localStorage.setItem("token", data.token);
 
+      try {
+  const crmRes = await fetch("https://restapizip.iatpl.net/api/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "API-Key": "d8QF1yV7D3NfMZJk1O+6n3r3xM0pHqVw+TfJdD6TzXw=",
+    },
+    body: JSON.stringify({
+      Name: form.name,
+      MobileNumber: form.countryCode + form.phone,
+      Email: form.email,
+      Message: "New signup from Zipacres app",
+    }),
+  });
+
+  const crmData = await crmRes.json();
+  if (crmData.Success) {
+    console.log("CRM saved:", crmData.Message);
+  } else {
+    console.error("CRM API failed:", crmData.Message);
+  }
+} catch (crmErr) {
+  console.error("Error sending to CRM API:", crmErr);
+}
+
       if (data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {

@@ -26,12 +26,14 @@ app.use(cors({
 const propertyRoutes = require("./routes/property");
 const leadRoutes = require("./routes/leads");
 const authRoutes = require("./routes/auth");
+const otpRoutes = require('./routes/otpRoutes');
 
 
 
 app.use("/api/properties", propertyRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/leads", leadRoutes);
+app.use('/api', otpRoutes);
 
 
 
