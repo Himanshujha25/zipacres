@@ -163,55 +163,7 @@ setTimeout(() => navigate("/login"), 2000);
     }
   };
 
-  // Google login
-  const handleGoogleSignup = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const userInfoRes = await fetch(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${tokenResponse.access_token}`,
-            },
-          }
-        );
-        const profile = await userInfoRes.json();
-
-        let phone = form.phone;
-        if (!phone) {
-          phone = prompt("Please enter your 10-digit phone number:");
-          if (!phone || !/^\d{10}$/.test(phone)) {
-            setError("Invalid phone number for Google signup.");
-            return;
-          }
-        }
-        const fullPhone = form.countryCode + phone;
-
-        const res = await fetch(
-          "https://zipacres.onrender.com/api/auth/google",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              tokenId: tokenResponse.access_token,
-              phone: fullPhone,
-            }),
-          }
-        );
-        const data = await res.json();
-        if (data.success) {
-          localStorage.setItem("token", data.token);
-          alert(data.message);
-          navigate("/properties");
-        } else {
-          setError(data.message || "Google signup/login failed");
-        }
-      } catch (err) {
-        setError(err.message);
-      }
-    },
-    onError: () => setError("Google login failed"),
-  });
+  
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-gray-100 to-indigo-100 flex items-center justify-center p-4 py-8">
@@ -428,17 +380,6 @@ setTimeout(() => navigate("/login"), 2000);
           </motion.button>
         </form>
 
-        <button
-          onClick={() => handleGoogleSignup()}
-          className="mt-4 w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-3 text-sm font-medium hover:bg-gray-50"
-        >
-          <img
-            src="https://developers.google.com/identity/images/g-logo.png"
-            alt="Google Icon"
-            className="w-6 h-6 mr-2"
-          />
-          Sign up with Google
-        </button>
 
         <AnimatePresence>
           {error && (
