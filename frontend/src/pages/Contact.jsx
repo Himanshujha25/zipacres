@@ -258,7 +258,7 @@ export default function Contact() {
                   Quick Contact
                 </h3>
                 <a
-                  href="https://wa.me/9990263263"
+                  href="https://wa.me/919990263263"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors mb-2"
