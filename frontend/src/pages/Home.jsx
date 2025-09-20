@@ -707,7 +707,7 @@ const allProperties = [
                 Speak directly with our property experts
               </p>
               <a
-                href="tel:+911234567890"
+                href="tel:+919990263263"
                 className="text-blue-800 font-semibold hover:text-blue-900 transition-colors"
               >
                 +91 9990263263
