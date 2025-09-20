@@ -160,14 +160,15 @@ const scaleIn = {
 export default function Home() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
-  const allProperties = [
-    { id: 1, name: 'Luxury Villa', location: 'Mumbai', image: 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg', featured: true, trending: true, },
-    { id: 2, name: 'Modern Apartment', location: 'Delhi', image: 'https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg', featured: true, trending: false, },
-    { id: 3, name: 'Penthouse Suite', location: 'Bangalore', image: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg', featured: true, trending: true },
-    { id: 4, name: 'Sea View Flat', location: 'Mumbai', image: 'https://images.pexels.com/photos/164558/pexels-photo-164558.jpeg', featured: false, trending: true, },
-    { id: 5, name: 'Garden House', location: 'Pune', image: 'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg', featured: false, trending: false, },
-    { id: 6, name: 'City Center Condo', location: 'Delhi', image: 'https://images.pexels.com/photos/209296/pexels-photo-209296.jpeg', featured: false, trending: true, },
-  ];
+const allProperties = [
+  { id: 1, name: 'Apartment', location: 'Delhi', image: 'https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg', featured: true, trending: false },
+  { id: 2, name: 'Villa', location: 'Noida', image: 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg', featured: true, trending: true },
+  { id: 3, name: 'House', location: 'Faridabad', image: 'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg', featured: false, trending: false },
+  { id: 4, name: 'Condo', location: 'Badarpur', image: 'https://images.pexels.com/photos/209296/pexels-photo-209296.jpeg', featured: false, trending: true },
+  { id: 5, name: 'Penthouse', location: 'Ghaziabad', image: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg', featured: true, trending: true },
+  { id: 6, name: 'Studio', location: 'Greater Noida', image: 'https://images.pexels.com/photos/164558/pexels-photo-164558.jpeg', featured: false, trending: true },
+];
+
 
   const featuredProperties = allProperties.filter(p => p.featured).slice(0, 3);
   const trendingProperties = allProperties.filter(p => p.trending).slice(0, 3);
