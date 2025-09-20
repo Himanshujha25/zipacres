@@ -258,7 +258,7 @@ export default function Contact() {
                   Quick Contact
                 </h3>
                 <a
-                  href="https://wa.me/919876543210"
+                  href="https://wa.me/9990263263"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors mb-2"
@@ -272,7 +272,7 @@ export default function Contact() {
                   </div>
                 </a>
                 <a
-                  href="tel:+9990-263-263"
+                  href="tel:+91 9990263263"
                   className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors mb-2"
                 >
                   <div className="flex items-center justify-center w-10 h-10 bg-gray-600 text-white rounded-lg">

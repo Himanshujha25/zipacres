@@ -266,17 +266,20 @@ setTimeout(() => navigate("/login"), 2000);
   </button>
 </div>
 
-
-          {/* otp input */}
-    {isOtpSent && (
+  {/* otp input */}
+ {isOtpSent && (
   <div className="mt-3 bg-white/40 backdrop-blur-md p-4 rounded-xl shadow-lg">
-    <label htmlFor="otp" className="block text-gray-700 text-sm mb-2">
+    <label
+      htmlFor="otp"
+      className="block text-gray-700 text-sm mb-2"
+    >
       Enter the 6-digit code we sent
     </label>
-    <div className="flex space-x-2">
+
+    <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
       <input
         id="otp"
-        type="text"            /* show digits normally */
+        type="text"
         inputMode="numeric"
         pattern="[0-9]*"
         maxLength={6}
@@ -287,23 +290,26 @@ setTimeout(() => navigate("/login"), 2000);
         }}
         placeholder="0 0 0 0 0 0"
         className="
-          flex-1 
+          w-full sm:flex-1
           px-6 py-4 
           rounded-lg 
           border border-gray-300 
           focus:outline-none focus:ring-2 focus:ring-blue-500
-          tracking-[1em] /* spaces characters */
-          text-center text-lg font-mono /* mono font like OTP boxes */
+          tracking-[1em]
+          text-center text-lg font-mono
         "
       />
+
       <button
         type="button"
         onClick={handleVerifyOtp}
         disabled={otp.length !== 6}
-        className={`px-4 py-3 rounded-lg text-white text-sm transition-colors 
-          ${otp.length === 6 
-            ? 'bg-green-600 hover:bg-green-700' 
-            : 'bg-gray-400 cursor-not-allowed'}`}
+        className={`w-full sm:w-auto px-4 py-3 rounded-lg text-white text-sm transition-colors 
+          ${
+            otp.length === 6
+              ? 'bg-green-600 hover:bg-green-700'
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
       >
         Verify
       </button>
@@ -313,15 +319,23 @@ setTimeout(() => navigate("/login"), 2000);
 
 {isVerified && (
   <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none"
-      viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M5 13l4 4L19 7"
+      />
     </svg>
     Phone verified
   </p>
 )}
-
-
 
           {/* password */}
           <div className="relative">
