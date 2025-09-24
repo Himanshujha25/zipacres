@@ -4,10 +4,12 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { useAuth } from "./AuthContext";
 
 const PropertyContext = createContext();
+
 export const useProperties = () => useContext(PropertyContext);
 
 export const PropertyProvider = ({ children }) => {
@@ -15,16 +17,12 @@ export const PropertyProvider = ({ children }) => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch admin's own properties (for Dashboard)
-  const fetchProperties = useCallback(async () => {
-    if (!user || user.role !== "admin") {
-      setProperties([]);
-      setLoading(false);
-      return;
-    }
+  // This function remains useful for an admin-specific page (e.g., a dashboard)
+  const fetchMyProperties = useCallback(async () => {
+    if (!user || user.role !== "admin") return;
 
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await fetch("https://zipacres.onrender.com/api/properties/my", {
         method: "GET",
         headers: {
@@ -33,9 +31,10 @@ export const PropertyProvider = ({ children }) => {
         },
       });
 
-      if (!res.ok) throw new Error("Failed to fetch your properties");
+      if (!res.ok) {
+        throw new Error("Failed to fetch your properties");
+      }
       const data = await res.json();
-      
       setProperties(data.data || []);
     } catch (err) {
       console.error("Error fetching your properties:", err);
@@ -45,17 +44,13 @@ export const PropertyProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Fetch all public properties (for Properties page)
+  // This is the primary function for fetching properties for the public list
   const fetchAllProperties = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      // For all public properties, we don't need authentication
       const headers = {
         "Content-Type": "application/json",
       };
-      
-      // Add auth header if user is logged in
       if (user?.token) {
         headers.Authorization = `Bearer ${user.token}`;
       }
@@ -65,9 +60,10 @@ export const PropertyProvider = ({ children }) => {
         headers,
       });
 
-      if (!res.ok) throw new Error("Failed to fetch all properties");
+      if (!res.ok) {
+        throw new Error("Failed to fetch all properties");
+      }
       const data = await res.json();
-      
       setProperties(data.data || []);
     } catch (err) {
       console.error("Error fetching all properties:", err);
@@ -77,43 +73,51 @@ export const PropertyProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Auto-fetch admin's properties when user logs in (for Dashboard)
+  // CHANGED: This useEffect is now simplified to meet your requirement.
+  // It always fetches all properties for any user.
   useEffect(() => {
-    if (user && user.role === "admin") {
-      fetchProperties();
-    } else {
-      setProperties([]);
-      setLoading(false);
-    }
-  }, [user, fetchProperties]);
+    fetchAllProperties();
+  }, [fetchAllProperties]); // Runs when the component mounts or when fetchAllProperties changes (i.e., when user logs in/out).
 
-  const addProperty = (property) => {
+
+  const addProperty = useCallback((property) => {
     setProperties((prev) => [property, ...prev]);
-  };
+  }, []);
 
-  const updateProperty = (updatedProperty) => {
+  const updateProperty = useCallback((updatedProperty) => {
     setProperties((prev) =>
       prev.map((p) => (p._id === updatedProperty._id ? updatedProperty : p))
     );
-  };
+  }, []);
 
-  const deleteProperty = (id) => {
+  const deleteProperty = useCallback((id) => {
     setProperties((prev) => prev.filter((p) => p._id !== id));
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      properties,
+      loading,
+      setProperties,
+      fetchMyProperties, // Still available if you need it elsewhere
+      fetchAllProperties,
+      addProperty,
+      updateProperty,
+      deleteProperty,
+    }),
+    [
+      properties,
+      loading,
+      fetchMyProperties,
+      fetchAllProperties,
+      addProperty,
+      updateProperty,
+      deleteProperty,
+    ]
+  );
 
   return (
-    <PropertyContext.Provider
-      value={{
-        properties,
-        loading,
-        setProperties,
-        fetchProperties,        // For Dashboard - admin's own properties
-        fetchAllProperties,     // For Properties page - all public properties
-        addProperty,
-        updateProperty,
-        deleteProperty,
-      }}
-    >
+    <PropertyContext.Provider value={value}>
       {children}
     </PropertyContext.Provider>
   );

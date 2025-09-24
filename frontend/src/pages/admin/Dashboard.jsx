@@ -21,7 +21,7 @@ const inputClass =
   "w-full border-2 border-gray-200 px-3 py-2 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-blue-900 transition-all";
 
 export default function Dashboard() {
-  const { properties, deleteProperty, updateProperty, loading, fetchProperties } = useProperties();
+  const { properties, deleteProperty, updateProperty, loading, fetchMyProperties } = useProperties();
   const { user: currentUser } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [editingProperty, setEditingProperty] = useState(null);
@@ -32,9 +32,9 @@ export default function Dashboard() {
   // Fetch admin's own properties when component mounts
   useEffect(() => {
     if (currentUser && currentUser.role === "admin") {
-      fetchProperties(); // This will fetch only admin's own properties
+      fetchMyProperties(); // This will fetch only admin's own properties
     }
-  }, [currentUser, fetchProperties]);
+  }, [currentUser, fetchMyProperties]);
 
   const handleDelete = async (propertyId, title) => {
     if (!window.confirm(`Delete "${title}"?`)) return;
