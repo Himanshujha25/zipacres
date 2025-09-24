@@ -986,7 +986,7 @@ export default function Home() {
                 href="mailto:info@zipacres.com"
                 className="text-green-800 font-semibold hover:text-green-900 transition-colors"
               >
-                contact@zipacres.com
+                Om.mehtatso@gmail.com
               </a>
             </motion.div>
 

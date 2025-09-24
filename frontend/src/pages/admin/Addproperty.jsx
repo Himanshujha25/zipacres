@@ -93,7 +93,7 @@ export default function AddProperty() {
       };
       delete formToSend.areaUnit;
 
-      const res = await fetch("http://localhost:5000/api/properties", {
+      const res = await fetch("http://zipacres.onrender.com/api/properties", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

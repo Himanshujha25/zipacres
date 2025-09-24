@@ -58,7 +58,7 @@ export default function Contact() {
                 <h1 className="text-3xl font-semibold text-white text-center py-4 rounded-lg">Send Your Query</h1>
               </div>
               <form
-                action="https://formsubmit.co/jhahimanshu930@gmail.com"
+                action="https://formsubmit.co/Om.mehtatso@gmail.com"
                 method="POST"
                 className="space-y-6"
               >
@@ -113,11 +113,11 @@ export default function Contact() {
                     <p className="text-sm text-gray-600">+91 9990263263</p>
                   </div>
                 </a>
-                <a href="mailto:contact@zipacres.com" className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+                <a href="mailto:Om.mehtatso@gmail.com" className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center justify-center w-10 h-10 bg-gray-600 text-white rounded-lg"><MailIcon /></div>
                   <div className="ml-3">
                     <p className="font-medium text-gray-900">Email</p>
-                    <p className="text-sm text-gray-600">contact@zipacres.com</p>
+                    <p className="text-sm text-gray-600">Om.mehtatso@gmail.com</p>
                   </div>
                 </a>
               </div>
