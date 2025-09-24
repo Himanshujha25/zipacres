@@ -112,38 +112,17 @@ const MailIcon = () => (
     <polyline points="22,6 12,13 2,6"></polyline>
   </svg>
 );
-// --- END ICON COMPONENTS ---
 
-// --- PLACEHOLDER PROPERTY CARD ---
-const PropertyCard = ({ property }) => (
-  <div className="bg-zinc-200 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-    <img
-      src={property.image}
-      alt={property.name}
-      className="w-full h-56 object-cover"
-    />
-    <div className="p-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 ">
-            {property.name}
-          </h3>
-          <p className="text-gray-600 text-sm">{property.location}</p>
-        </div>
-        {property.featured && (
-          <div className="text-xs uppercase font-semibold text-white bg-blue-900 px-2 py-1 rounded-full">
-            Featured
-          </div>
-        )}
-      </div>
-      <p className="text-2xl font-semibold text-blue-700 my-4">
-        {property.price}
-      </p>
-      <div className="flex justify-between text-sm text-gray-500 border-t pt-4"></div>
-    </div>
-  </div>
+const WhatsAppIcon = () => (
+  <svg
+    className="w-8 h-8 text-white"
+    fill="currentColor"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.487 5.235 3.487 8.413 0 6.556-5.338 11.891-11.893 11.891-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.919 6.066l-1.21 4.389 4.462-1.166zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+  </svg>
 );
-// --- END PLACEHOLDER PROPERTY CARD ---
 
 // --- FRAMER MOTION VARIANTS ---
 const fadeInUp = {
@@ -164,11 +143,33 @@ const scaleIn = {
     transition: { duration: 0.6, ease: "easeOut" },
   },
 };
-// --- END FRAMER MOTION VARIANTS ---
 
 export default function Home() {
+  // --- STATE MANAGEMENT ---
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [email, setEmail] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // --- HANDLER FUNCTIONS ---
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (email.trim() !== "") {
+      console.log(`Subscribed with: ${email}`);
+      setIsSubmitted(true);
+    }
+  };
+
+  const nextTestimonial = () => {
+    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonial(
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
+    );
+  };
+
+  // --- DATA ---
   const allProperties = [
     {
       id: 1,
@@ -220,57 +221,101 @@ export default function Home() {
     },
   ];
 
-  const featuredProperties = allProperties
-    .filter((p) => p.featured)
-    .slice(0, 3);
-  const trendingProperties = allProperties
-    .filter((p) => p.trending)
-    .slice(0, 3);
-
-  const locationProjects = allProperties.reduce((acc, property) => {
-    const location = property.location || "Other";
-    if (!acc[location]) {
-      acc[location] = [];
-    }
-    acc[location].push(property);
-    return acc;
-  }, {});
-
-  const topLocations = Object.entries(locationProjects)
-    .sort(([, a], [, b]) => b.length - a.length)
-    .slice(0, 4);
-
-  const colorClasses = {
-    blue: {
-      bg: "bg-blue-100",
-      text: "text-blue-600",
-      border: "border-blue-100",
+  const testimonials = [
+    {
+      name: "Mehar Chand",
+      role: "Customer",
+      content:
+        "ZipAcres made my plot buying journey smooth and hassle-free. Found the perfect location with their help!",
+      rating: 5,
+      location: "South Delhi",
+      image: "/images/l1.jpeg",
     },
-    emerald: {
-      bg: "bg-emerald-100",
-      text: "text-emerald-600",
-      border: "border-emerald-100",
+    {
+      name: "Yadbeer Singh",
+      role: "Customer",
+      content:
+        "Professional, responsive, and reliable. My home search was stress-free with ZipAcres.",
+      rating: 5,
+      location: "Delhi",
+      image: "/images/l2.jpeg",
     },
-    purple: {
-      bg: "bg-purple-100",
-      text: "text-purple-600",
-      border: "border-purple-100",
+    {
+      name: "Vishwanath Thakur",
+      role: "Customer",
+      content: "ZipAcres made my home purchase smooth and stress-free.",
+      rating: 5,
+      location: "South Delhi",
+      image: "/images/l3.jpeg",
     },
-  };
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
+    {
+      name: "Vishnu Chandra",
+      role: "Customer",
+      content:
+        "ZipAcres made buying my villa seamless—their professional team helped me find the perfect one.",
+      rating: 5,
+      location: "West Delhi",
+      image: "/images/l4.jpeg",
+    },
+    {
+      name: "Viney Kumar",
+      role: "Customer",
+      content:
+        "Found my dream apartment easily with ZipAcres’ expert guidance and support.",
+      rating: 5,
+      location: "Faridabad",
+      image: "/images/l5.jpeg",
+    },
+    {
+      name: "Vikram Singh",
+      role: "First-time Buyer",
+      content:
+        "Exceptional service and market knowledge. They helped me identify great investment opportunities and handled all the paperwork seamlessly.",
+      rating: 5,
+      location: "New Delhi",
+      image: "/images/l6.jpeg",
+    },
+    {
+      name: "Bibekanand Sharma",
+      role: "First-time Buyer",
+      content:
+        "As a first-time buyer, I was nervous. ZipAcres guided me through every step and made sure I understood everything clearly.",
+      rating: 5,
+      location: "Bihar",
+      image: "/images/l7.jpeg",
+    },
+    {
+      name: "Bharat Singh",
+      role: "Property Developer",
+      content:
+        "Outstanding market insights and professional approach. They've been instrumental in helping us launch our residential projects successfully.",
+      rating: 5,
+      location: "South Delhi",
+      image: "/images/l8.jpeg",
+    },
+  ];
 
-  const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.6 } },
-  };
-
-  const cardVariants = {
-    hidden: { scale: 0.9, opacity: 0 },
-    visible: { scale: 1, opacity: 1, transition: { duration: 0.5 } },
-  };
+  const trustedCustomers = [
+    {
+      id: 1,
+      name: "Amit Verma",
+      image: "/images/rel1.jpeg",
+      location: "Delhi",
+    },
+    {
+      id: 2,
+      name: "Rashika Jha",
+      image: "/images/rel2.jpeg",
+      location: "Noida",
+    },
+    { id: 3, name: "Vikash Kumar", image: "/images/rel3.jpeg", location: "Meerut" },
+    {
+      id: 4,
+      name: "Sarah Sha",
+      image: "/images/rel4.jpeg",
+      location: "Faridabad",
+    },
+  ];
 
   const features = [
     {
@@ -302,112 +347,28 @@ export default function Home() {
     { number: "50+", label: "Prime Locations", icon: MapPinIcon },
     { number: "10+", label: "Years Experience", icon: BuildingIcon },
   ];
-  const trustedCustomers = [
-    {
-      id: 1,
-      name: "Amit Verma",
-      image: "/images/rel1.jpeg",
-      location: "Delhi",
-      property: "Villa",
-    },
-    {
-      id: 2,
-      name: "Rashika Jha",
-      image: "/images/rel2.jpeg",
-      location: "Noida",
-      property: "Apartment",
-    },
-    {
-      id: 3,
-      name: "Vikash Kumar",
-      image: "/images/rel3.jpeg",
-      location: "Meerut",
-      property: "Office Space",
-    },
-    {
-      id: 4,
-      name: "Sarah Sha",
-      image: "/images/rel4.jpeg",
-      location: "Faridabad",
-      property: "Flat",
-    },
-  ];
 
-  const testimonials = [
-    {
-      name: "Mehar chand",
-      role: "Customer",
-      content:
-        "ZipAcres made my plot buying journey smooth and hassle-free. Found the perfect location with their help!",
-      rating: 5,
-      location: "South Delhi",
-      image: "/images/l1.jpeg",
-    },
-    {
-      name: "Yadbeer",
-      role: "Customer",
-      content:
-        "Professional, responsive, and reliable. My home search was stress-free with ZipAcres.",
-      rating: 5,
-      location: "Delhi",
-      image: "/images/l2.jpeg",
-    },
-    {
-      name: "Vishwanath Thakur",
-      role: "Customer",
-      content:
-        "ZipAcres made my home purchase smooth and stress-free.",
-      rating: 5,
-      location: "South Delhi",
-      image: "/images/l3.jpeg",
-    },
-    {
-      name: "Vishnu Chandra",
-      role: "Customer",
-      content:
-        "ZipAcres made buying my villa seamless-their professional team helped me find the perfect one.",
-      rating: 5,
-      location: "West Delhi",
-      image: "/images/l4.jpeg",
-    },
-    {
-      name: "Viney Kumar",
-      role: "Customer",
-      content:
-        "Found my dream apartment easily with ZipAcres’ expert guidance and support.",
-      rating: 5,
-      location: "Faridabad",
-      image: "/images/l5.jpeg",
-    },
-    {
-      name: "Vikram Singh",
-      role: "First-time Buyer",
-      content:
-        "Exceptional service and market knowledge. They helped me identify great investment opportunities and handled all the paperwork seamlessly.",
-      rating: 5,
-      location: "New Delhi",
-      image: "/images/l6.jpeg",
-    },
-    {
-      name: "Bibekanand Sharma",
-      role: "First-time Buyer",
-      content:
-        "As a first-time buyer, I was nervous about the process. ZipAcres guided me through every step and made sure I understood everything clearly.",
-      rating: 5,
-      location: "Bihar",
-      image: "/images/l7.jpeg",
-    },
-    {
-      name: "Bharat Singh",
-      role: "Property Developer",
-      content:
-        "Outstanding market insights and professional approach. They've been instrumental in helping us launch our residential projects successfully.",
-      rating: 5,
-      location: "South Delhi",
-      image: "/images/l8.jpeg",
-    },
-  ];
+  // --- DERIVED DATA & CONSTANTS ---
+  const locationProjects = allProperties.reduce((acc, property) => {
+    const location = property.location || "Other";
+    if (!acc[location]) {
+      acc[location] = [];
+    }
+    acc[location].push(property);
+    return acc;
+  }, {});
 
+  const topLocations = Object.entries(locationProjects)
+    .sort(([, a], [, b]) => b.length - a.length)
+    .slice(0, 4);
+
+  const colorClasses = {
+    blue: { bg: "bg-blue-100", text: "text-blue-600", border: "border-blue-100" },
+    emerald: { bg: "bg-emerald-100", text: "text-emerald-600", border: "border-emerald-100" },
+    purple: { bg: "bg-purple-100", text: "text-purple-600", border: "border-purple-100" },
+  };
+
+  // --- SIDE EFFECTS ---
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -415,18 +376,9 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [testimonials.length]);
 
-  const nextTestimonial = () => {
-    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-  };
-
-  const prevTestimonial = () => {
-    setCurrentTestimonial(
-      (prev) => (prev - 1 + testimonials.length) % testimonials.length
-    );
-  };
-
   return (
     <div className="w-full bg-gray-100 text-gray-800">
+      {/* --- HERO SECTION --- */}
       <motion.section
         initial="hidden"
         animate="visible"
@@ -477,6 +429,7 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* --- STATS SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -508,118 +461,82 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* Trusted Customers */}
+      {/* --- TRUSTED CUSTOMERS & VIDEO SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={staggerContainer}
-        className="py-24 px-4 sm:px-6 lg:px-8  bg-zinc-100"
+        className="py-24 px-4 sm:px-6 lg:px-8 bg-zinc-100"
       >
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-6">
             <motion.h2
               variants={fadeInUp}
               className="text-4xl md:text-5xl font-semibold tracking-tight mb-2 max-w-2xl text-center mx-auto leading-relaxed"
             >
-              Trusted Customer
+              Trusted Customers
             </motion.h2>
-
             <motion.p
               variants={fadeInUp}
               className="text-gray-600 text-lg md:text-xl text-center max-w-2xl mx-auto leading-tight"
             >
-              Thousands trust us to make their dream property a reality{" "}
+              Thousands trust us to make their dream property a reality.
             </motion.p>
           </div>
-          
 
-         {/* Customer Cards */}
-<motion.div
-  variants={staggerContainer}
-  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-20"
->
-  {trustedCustomers.map((customer, index) => (
-    <motion.div
-      key={customer.id}
-      variants={fadeInUp}
-      whileHover={{ y: -8, scale: 1.02 }}
-      transition={{ duration: 0.1, ease: "easeOut" }}
-      className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100/50 backdrop-blur-sm"
-    >
-      {/* ✅ Image area with Blog link */}
-      <Link to="/blog" className="relative block">
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10"></div>
-          <img
-            src={customer.image}
-            alt={customer.name}
-            className="w-full h-64 object-cover object-[50%_20%] group-hover:scale-110 transition-transform duration-700 filter group-hover:brightness-110"
-          />
-          {/* Small overlay Blog button */}
-          <div className="absolute top-3 right-3 bg-blue-700 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-            Blog
-            <svg
-              className="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </div>
-      </Link>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-20"
+          >
+            {trustedCustomers.map((customer) => (
+              <motion.div
+                key={customer.id}
+                variants={fadeInUp}
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ duration: 0.1, ease: "easeOut" }}
+                className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100/50"
+              >
+                <Link to="/blog" className="relative block">
+                  <div className="relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10"></div>
+                    <img
+                      src={customer.image}
+                      alt={customer.name}
+                      className="w-full h-64 object-cover object-[50%_20%] group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute top-3 right-3 bg-blue-700 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                      Blog
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </Link>
+                <div className="p-6 bg-blue-900 relative">
+                  <div className="relative z-10 text-center">
+                    <h3 className="text-lg font-semibold text-white mb-1 tracking-wide">
+                      {customer.name}
+                    </h3>
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <svg className="w-4 h-4 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                      </svg>
+                      <p className="text-sm text-blue-200 font-medium">{customer.location}</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
 
-      {/* Card Content (unchanged) */}
-      <div className="p-6 bg-blue-900 relative">
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-        <div className="relative z-10 text-center">
-          <h3 className="text-lg font-semibold text-white mb-1 tracking-wide group-hover:text-blue-100 transition-colors duration-300">
-            {customer.name}
-          </h3>
-
-          <div className="flex items-center justify-center gap-1 mb-2">
-            <svg
-              className="w-4 h-4 text-blue-300"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className="text-sm text-blue-200 font-medium">{customer.location}</p>
-          </div>
-
-          <div className="inline-block bg-blue-800 backdrop-blur-sm rounded-full px-4 py-2 border border-blue-400/30">
-            <p className="text-sm text-blue-100 font-semibold">{customer.property}</p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  ))}
-</motion.div>
-
-
-          {/* YouTube Video Section */}
           <motion.div
             variants={fadeInUp}
             className="relative max-w-6xl mx-auto mb-6"
           >
-            {/* Glowing background effect */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-red-500/20 via-pink-500/20 to-red-500/20 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
-
+            <div className="absolute -inset-4 bg-gradient-to-r from-red-500/20 via-pink-500/20 to-red-500/20 rounded-3xl blur-2xl opacity-60"></div>
             <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-3xl overflow-hidden shadow-2xl border border-gray-700/50">
-              <div
-                className="relative w-full"
-                style={{ paddingBottom: "56.25%" }}
-              >
+              <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
                 <iframe
                   className="absolute top-0 left-0 w-full h-full"
                   src="https://www.youtube.com/embed/8-GwOifS2MA?autoplay=1&mute=1&loop=1&playlist=8-GwOifS2MA&controls=1&rel=0&modestbranding=1"
@@ -629,12 +546,10 @@ export default function Home() {
                   allowFullScreen
                   loading="lazy"
                 ></iframe>
-                
               </div>
             </div>
           </motion.div>
 
-          {/* YouTube Channel Button */}
           <motion.div variants={fadeInUp} className="flex justify-center">
             <motion.a
               href="https://www.youtube.com/@zipacres"
@@ -645,41 +560,21 @@ export default function Home() {
               transition={{ duration: 0.2 }}
               className="group inline-flex items-center gap-4 px-8 py-4 bg-red-800 text-white text-md font-semibold rounded-2xl shadow-2xl hover:shadow-red-500/25 relative overflow-hidden border border-red-500/20"
             >
-              {/* Animated background gradient */}
               <div className="absolute inset-0 bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-              {/* Shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-7 h-7 fill-current text-white relative z-10 group-hover:scale-110 transition-transform duration-300"
-                viewBox="0 0 576 512"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 fill-current text-white relative z-10 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 576 512">
                 <path d="M549.655 124.083c-6.281-23.65-24.81-42.18-48.459-48.459C458.299 64 288 64 288 64S117.701 64 74.804 75.624c-23.65 6.281-42.179 24.81-48.459 48.459C14.721 167.02 14.721 256 14.721 256s0 88.98 11.624 131.917c6.281 23.65 24.81 42.18 48.459 48.459C117.701 448 288 448 288 448s170.299 0 213.196-11.624c23.65-6.281 42.179-24.81 48.459-48.459C561.279 344.98 561.279 256 561.279 256s0-88.98-11.624-131.917zM232 338.5v-165l142 82.5-142 82.5z" />
               </svg>
-
-              <span className="relative z-10 group-hover:text-red-50 transition-colors duration-300">
-                Explore Our YouTube Channel
-              </span>
-
-              <svg
-                className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
+              <span className="relative z-10">Explore Our YouTube Channel</span>
+              <svg className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </motion.a>
           </motion.div>
-          
         </div>
       </motion.section>
 
+      {/* --- PRIME LOCATIONS SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -696,7 +591,6 @@ export default function Home() {
               Explore properties across prime neighborhoods and emerging hubs.
             </p>
           </motion.div>
-
           {topLocations.length > 0 ? (
             <motion.div
               variants={staggerContainer}
@@ -733,6 +627,7 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* --- DRIVEN BY QUALITY SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -742,14 +637,13 @@ export default function Home() {
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-6">
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight md:text-center mb-1 max-w-2xl text-left lg:text-center mx-auto leading-relaxed">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-center mx-auto leading-relaxed max-w-2xl">
               Driven by Quality
             </h2>
-            <p className="text-gray-600 text-lg md:text-xl tracking-tighter mx-auto md:text-center leading-tight text-left lg:text-center max-w-2xl">
+            <p className="text-gray-600 text-lg md:text-xl tracking-tighter mx-auto text-center leading-tight max-w-2xl">
               Delivering excellence in real estate services.
             </p>
           </motion.div>
-
           <motion.div
             variants={staggerContainer}
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
@@ -762,12 +656,10 @@ export default function Home() {
                   variants={fadeInUp}
                   className={`text-center p-10 bg-gray-100 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-500 border-2 ${border} hover:border-opacity-50`}
                 >
-                  <div
-                    className={`inline-flex p-6 rounded-full ${bg} ${text} mb-6 shadow-xl`}
-                  >
+                  <div className={`inline-flex p-6 rounded-full ${bg} ${text} mb-6 shadow-xl`}>
                     <feature.icon />
                   </div>
-                  <h3 className="text-2xl font-semibold mb-2 tracking-tight ">
+                  <h3 className="text-2xl font-semibold mb-2 tracking-tight">
                     {feature.title}
                   </h3>
                   <p className="text-gray-600 leading-tight text-md">
@@ -780,6 +672,7 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* --- CLIENT TESTIMONIALS SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -789,14 +682,13 @@ export default function Home() {
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-6">
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight md:text-center mb-1 max-w-2xl  lg:text-center mx-auto leading-relaxed">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-center mx-auto leading-relaxed max-w-2xl">
               Client Testimonials
             </h2>
-            <p className="text-gray-600 text-lg md:text-xl tracking-tighter mx-auto md:text-center leading-tight  lg:text-center max-w-2xl">
+            <p className="text-gray-600 text-lg md:text-xl tracking-tighter mx-auto text-center leading-tight max-w-2xl">
               Experiences that speak for themselves.
             </p>
           </motion.div>
-
           <motion.div
             variants={fadeInUp}
             className="relative max-w-4xl mx-auto"
@@ -805,7 +697,6 @@ export default function Home() {
               <div className="absolute top-6 left-8">
                 <QuoteIcon />
               </div>
-
               <div className="relative z-10">
                 <motion.div
                   key={currentTestimonial}
@@ -822,11 +713,9 @@ export default function Home() {
                       )
                     )}
                   </div>
-
                   <p className="text-lg md:text-xl text-zinc-100 leading-tight tracking-tight mb-6 font-semibold">
                     "{testimonials[currentTestimonial].content}"
                   </p>
-
                   <div className="flex items-center justify-center space-x-4">
                     <img
                       src={testimonials[currentTestimonial].image}
@@ -848,7 +737,6 @@ export default function Home() {
                 </motion.div>
               </div>
             </div>
-
             <button
               onClick={prevTestimonial}
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-zinc-200 shadow-lg rounded-full p-3 hover:bg-gray-100 transition-all duration-200 hover:scale-110"
@@ -863,17 +751,15 @@ export default function Home() {
             >
               <ChevronRightIcon />
             </button>
-
             <div className="flex justify-center space-x-3 mt-6">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                    index === currentTestimonial
-                      ? "bg-gray-800 scale-125"
-                      : "bg-gray-900 hover:bg-gray-800"
-                  }`}
+                  className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentTestimonial
+                    ? "bg-gray-800 scale-125"
+                    : "bg-gray-900 hover:bg-gray-800"
+                    }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}
@@ -882,6 +768,7 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* --- NEWSLETTER SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -891,41 +778,62 @@ export default function Home() {
       >
         <div className="max-w-4xl mx-auto text-center">
           <motion.div variants={fadeInUp}>
-            <span className="inline-block px-4 py-2 bg-white/20 rounded-full md:text-center text-sm font-semibold mb-4 text-left lg:text-center mx-auto">
+            <span className="inline-block px-4 py-2 bg-white/20 rounded-full text-sm font-semibold mb-4">
               STAY UPDATED
             </span>
-
-            <h2 className="text-4xl md:text-5xl font-semibold  tracking-tight mb-1 max-w-2xl md:text-center lg:text-center mx-auto leading-relaxed">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight mb-1 max-w-2xl text-center mx-auto leading-relaxed">
               Exclusive Property Alerts
             </h2>
-
-            <p className="text-md text-zinc-400 tracking-tighter leading-tight md:text-center mb-6 max-w-2xl mx-auto  lg:text-center">
+            <p className="text-md text-zinc-400 tracking-tighter leading-tight text-center mb-6 max-w-2xl mx-auto">
               Stay informed with exclusive property updates.
             </p>
           </motion.div>
-
-          <motion.form variants={fadeInUp} className="max-w-md mx-auto">
-            <div className="flex flex-col sm:flex-row gap-4 ">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-4 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/30"
-                required
-              />
-              <button
-                type="submit"
-                className="px-8 py-4 bg-white text-blue-900 font-semibold rounded-full hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          <div className="max-w-md mx-auto min-h-[96px]">
+            {isSubmitted ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center justify-center text-center bg-white/10 p-6 rounded-2xl h-full"
               >
-                Subscribe
-              </button>
-            </div>
-            <p className="text-blue-200 text-sm tracking-tighter leading-tight mt-4">
-              We respect your privacy. Unsubscribe at any time.
-            </p>
-          </motion.form>
+                <h3 className="text-2xl font-semibold text-white">🎉 Thank You!</h3>
+                <p className="text-blue-200 mt-1">
+                  You're on the list for exclusive updates.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.form
+                variants={fadeInUp}
+                className="max-w-md mx-auto"
+                onSubmit={handleSubscribe}
+              >
+                <div className="flex items-center w-full bg-white/10 p-2 rounded-full border border-white/20 focus-within:ring-2 focus-within:ring-white/50 transition-all duration-300 shadow-lg">
+                  <input
+                    type="email"
+                    placeholder="Your best email address"
+                    className="flex-1 w-full px-5 py-2 bg-transparent text-white placeholder-gray-300 focus:outline-none"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <motion.button
+                    type="submit"
+                    className="px-7 py-2 bg-white text-blue-900 font-semibold rounded-full shadow-md"
+                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Subscribe
+                  </motion.button>
+                </div>
+                <p className="text-blue-200 text-sm tracking-tight leading-tight mt-4">
+                  We respect your privacy. No spam, ever.
+                </p>
+              </motion.form>
+            )}
+          </div>
         </div>
       </motion.section>
 
+      {/* --- CONTACT INFO SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -935,15 +843,13 @@ export default function Home() {
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-6">
-            <h2 className="text-4xl md:text-5xl tracking-tight font-semibold mb-1 max-w-2xl md:text-center  lg:text-center mx-auto leading-relaxed">
-              Start Your Search{" "}
+            <h2 className="text-4xl md:text-5xl tracking-tight font-semibold mb-1 max-w-2xl text-center mx-auto leading-relaxed">
+              Start Your Search
             </h2>
-
-            <p className="text-md text-gray-600 tracking-tight leading-relaxed md:text-center  max-w-2xl mx-auto  lg:text-center">
+            <p className="text-md text-gray-600 tracking-tight leading-relaxed text-center max-w-2xl mx-auto">
               Expert guidance to find your dream property.
             </p>
           </motion.div>
-
           <motion.div
             variants={staggerContainer}
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
@@ -958,7 +864,7 @@ export default function Home() {
               <h3 className="text-xl font-semibold leading-relaxed tracking-tight mb-1">
                 Call Us
               </h3>
-              <p className="text-gray-600 mb-1 leading-relaxed tracking-tight ">
+              <p className="text-gray-600 mb-1 leading-relaxed tracking-tight">
                 Speak directly with our property experts
               </p>
               <a
@@ -968,7 +874,6 @@ export default function Home() {
                 +91 9990263263
               </a>
             </motion.div>
-
             <motion.div
               variants={scaleIn}
               className="text-center bg-gray-100 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
@@ -986,10 +891,9 @@ export default function Home() {
                 href="mailto:info@zipacres.com"
                 className="text-green-800 font-semibold hover:text-green-900 transition-colors"
               >
-                Om.mehtatso@gmail.com
+                info@zipacres.com
               </a>
             </motion.div>
-
             <motion.div
               variants={scaleIn}
               className="text-center p-8 bg-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -1004,7 +908,7 @@ export default function Home() {
                 Visit Our Headquarters
               </p>
               <a
-                href="https://www.google.com/maps?q=Tower+211A,+Near+Universal+Hospital,+Bypass+Road,+Badarpur+Border,+New+Delhi+110044"
+                href="https://maps.google.com" // Placeholder link
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-purple-800 font-semibold hover:text-purple-900 transition-colors"
@@ -1016,6 +920,7 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* --- FINAL CTA SECTION --- */}
       <motion.section
         initial="hidden"
         whileInView="visible"
@@ -1026,13 +931,13 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <motion.h2
             variants={fadeInUp}
-            className="text-4xl md:text-5xl font-semibold  tracking-tighter  mb-2 max-w-3xl md:text-center lg:text-center mx-auto leading-tight "
+            className="text-4xl md:text-5xl font-semibold tracking-tighter mb-2 max-w-3xl text-center mx-auto leading-tight"
           >
-            Ready to Find Your Dream Home?{" "}
+            Ready to Find Your Dream Home?
           </motion.h2>
           <motion.p
             variants={fadeInUp}
-            className="text-md text-zinc-400 tracking-tight leading-relaxed md:text-center mb-6  max-w-2xl mx-auto  lg:text-center"
+            className="text-md text-zinc-400 tracking-tight leading-relaxed text-center mb-6 max-w-2xl mx-auto"
           >
             Trusted guidance to help you find the right property.
           </motion.p>
@@ -1042,13 +947,28 @@ export default function Home() {
           >
             <a
               href="/properties"
-              className="inline-block bg-zinc-300 text-gray-900 font-semibold py-6 px-24 text-2xl rounded-full hover:bg-gray-400 transition-all duration-300  transform hover:scale-105"
+              className="inline-block bg-zinc-300 text-gray-900 font-semibold py-6 px-24 text-2xl rounded-full hover:bg-gray-400 transition-all duration-300 transform hover:scale-105"
             >
               Browse Properties
             </a>
           </motion.div>
         </div>
       </motion.section>
+
+      {/* --- FLOATING WHATSAPP ICON --- */}
+      <motion.a
+        href="https://wa.me/919990263263"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat on WhatsApp"
+        className="fixed bottom-8 right-8 z-50 bg-green-500 p-4 rounded-full shadow-lg hover:bg-green-600 hover:scale-110 transition-all duration-300"
+        initial="hidden"
+        animate="visible"
+        variants={scaleIn}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <WhatsAppIcon />
+      </motion.a>
     </div>
   );
 }
