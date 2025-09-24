@@ -15,7 +15,7 @@ const parsePrice = (priceStr) => {
 
 export default function Properties() {
   const navigate = useNavigate();
-  const { properties, loading, fetchallProperties } = useProperties();
+  const { properties, loading, fetchAllProperties } = useProperties();
 
   const [tempFilters, setTempFilters] = useState({
     search: "",
@@ -28,8 +28,8 @@ export default function Properties() {
   const applyFilters = () => setFilters(tempFilters);
 
   useEffect(() => {
-    fetchallProperties();
-  }, [fetchallProperties]);
+    fetchAllProperties();
+  }, [fetchAllProperties]);
 
   const filteredList = useMemo(() => {
     let result = [...properties];

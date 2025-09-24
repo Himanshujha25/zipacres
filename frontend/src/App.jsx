@@ -24,7 +24,11 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Signin />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/contact" element={
+           <ProtectedRoute roles={["user", "admin"]}>
+          <Contact />
+          </ProtectedRoute>
+          } />
         <Route path="/blog" element={<Blog />} />
         {/* // admin */}
         <Route path="/admin/dashboard" element={

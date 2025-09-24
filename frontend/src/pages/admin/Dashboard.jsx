@@ -14,8 +14,7 @@ const icons = {
   plus: "M12 6v6m0 0v6m0-6h6m-6 0H6",
   edit: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z",
   delete: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
-leads:
-    "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 110 7.75M8 3.13a4 4 0 110 7.75",
+  leads: "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 110 7.75M8 3.13a4 4 0 110 7.75",
 };
 
 const inputClass =
@@ -30,8 +29,11 @@ export default function Dashboard() {
   const [typeFilter, setTypeFilter] = useState("");
   const ITEMS_PER_PAGE = 5;
 
+  // Fetch admin's own properties when component mounts
   useEffect(() => {
-    if (currentUser) fetchProperties();
+    if (currentUser && currentUser.role === "admin") {
+      fetchProperties(); // This will fetch only admin's own properties
+    }
   }, [currentUser, fetchProperties]);
 
   const handleDelete = async (propertyId, title) => {
@@ -89,39 +91,37 @@ export default function Dashboard() {
     <div className="bg-gray-100 min-h-screen">
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
         {/* Header */}
-<header className="bg-gradient-to-r from-blue-900 via-blue-950 to-blue-900 px-6 py-5 rounded-lg shadow-lg">
-  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-    <div className="flex items-center gap-3">
-      <img src="/images/Zipacres Logo.png" alt="Logo" className="h-12 w-12 rounded-lg" />
-      <div>
-        <h1 className="text-2xl font-semibold text-white">ZipAcres Admin</h1>
-        <p className="text-slate-300">Hello, {userName}</p>
-      </div>
-    </div>
+        <header className="bg-gradient-to-r from-blue-900 via-blue-950 to-blue-900 px-6 py-5 rounded-lg shadow-lg">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-3">
+              <img src="/images/Zipacres Logo.png" alt="Logo" className="h-12 w-12 rounded-lg" />
+              <div>
+                <h1 className="text-2xl font-semibold text-white">ZipAcres Admin</h1>
+                <p className="text-slate-300">Hello, {userName}</p>
+              </div>
+            </div>
 
-    <div className="flex gap-3">
-      {/* Leads button */}
-      <Link
-        to="/admin/leads"
-        className="flex items-center gap-2 bg-zinc-200 hover:scale-105 transition-transform duration-300 text-black font-medium py-2.5 px-5 rounded-lg shadow-lg"
-      >
-        <Icon path={icons.leads} className="w-4 h-4 text-black" />
-        Leads
-      </Link>
+            <div className="flex gap-3">
+              {/* Leads button */}
+              <Link
+                to="/admin/leads"
+                className="flex items-center gap-2 bg-zinc-200 hover:scale-105 transition-transform duration-300 text-black font-medium py-2.5 px-5 rounded-lg shadow-lg"
+              >
+                <Icon path={icons.leads} className="w-4 h-4 text-black" />
+                Leads
+              </Link>
 
-      {/* Add Property button */}
-      <Link
-        to="/admin/addproperty"
-        className="flex items-center gap-2 bg-zinc-200 hover:scale-105 transition-transform duration-300 text-black font-medium py-2.5 px-5 rounded-lg shadow-lg"
-      >
-        <Icon path={icons.plus} className="w-4 h-4 text-black" />
-        Add Property
-      </Link>
-    </div>
-  </div>
-</header>
-
-
+              {/* Add Property button */}
+              <Link
+                to="/admin/addproperty"
+                className="flex items-center gap-2 bg-zinc-200 hover:scale-105 transition-transform duration-300 text-black font-medium py-2.5 px-5 rounded-lg shadow-lg"
+              >
+                <Icon path={icons.plus} className="w-4 h-4 text-black" />
+                Add Property
+              </Link>
+            </div>
+          </div>
+        </header>
 
         {/* Filters */}
         <div className="bg-white p-4 rounded-xl shadow flex flex-col md:flex-row gap-4">
@@ -137,15 +137,15 @@ export default function Dashboard() {
             className="border px-3 py-2 rounded w-full md:w-1/3"
           >
             <option value="">All Types</option>
-                  <option>Apartment</option>
-                    <option>Plot</option>
-                    <option>Villa</option>
-                    <option>Penthouse</option>
-                    <option>Studio</option>
-                    <option>Independent House</option>
-                    <option>Farmhouse</option>
-                    <option>Duplex</option>
-                    <option>Builder Floor</option>
+            <option>Apartment</option>
+            <option>Plot</option>
+            <option>Villa</option>
+            <option>Penthouse</option>
+            <option>Studio</option>
+            <option>Independent House</option>
+            <option>Farmhouse</option>
+            <option>Duplex</option>
+            <option>Builder Floor</option>
           </select>
         </div>
 
@@ -157,7 +157,7 @@ export default function Dashboard() {
           className="bg-zinc-50 rounded-xl shadow-sm border overflow-hidden"
         >
           <div className="p-4 border-b flex justify-between items-center">
-            <h3 className="text-lg font-semibold">All Properties</h3>
+            <h3 className="text-lg font-semibold">My Properties</h3>
             <span className="text-sm text-gray-700">
               Showing {paginatedProperties.length} of {filtered.length}
             </span>
@@ -167,6 +167,18 @@ export default function Dashboard() {
               {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
                 <div key={i} className="h-10 bg-gray-200 animate-pulse rounded"></div>
               ))}
+            </div>
+          ) : paginatedProperties.length === 0 ? (
+            <div className="text-center py-20">
+              <h2 className="text-xl font-semibold text-gray-600 mb-2">No Properties Found</h2>
+              <p className="text-gray-500 mb-4">You haven't added any properties yet.</p>
+              <Link
+                to="/admin/addproperty"
+                className="inline-flex items-center gap-2 bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition"
+              >
+                <Icon path={icons.plus} className="w-4 h-4" />
+                Add Your First Property
+              </Link>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -289,10 +301,14 @@ export default function Dashboard() {
                   className={`${inputClass} mb-3`}
                 >
                   <option>Apartment</option>
+                  <option>Plot</option>
                   <option>Villa</option>
-                  <option>House</option>
+                  <option>Penthouse</option>
+                  <option>Studio</option>
+                  <option>Independent House</option>
                   <option>Farmhouse</option>
-                  <option>Land/Plot</option>
+                  <option>Duplex</option>
+                  <option>Builder Floor</option>
                 </select>
                 <input
                   type="text"
@@ -312,7 +328,7 @@ export default function Dashboard() {
                   className={`${inputClass} mb-3`}
                   placeholder="Price"
                 />
-                {editingProperty.type !== "Land/Plot" && (
+                {editingProperty.type !== "Plot" && (
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <input
                       type="number"

@@ -64,18 +64,11 @@ exports.addProperty = async (req, res) => {
   }
 };
 
-// Fetch all properties
-exports.getProperties = async (req, res) => {
+// Fetch ALL properties (for public view - Properties page)
+exports.getAllProperties = async (req, res) => {
   try {
-    let query = {};
-
-    if (req.user.role !== "admin") {
-      // Normal users → only show listed/public properties
-      query = { status: "listed" };
-    }
-    // Admin → see everything (no filter)
-
-    const properties = await Property.find(query).populate(
+    // Always show only listed properties for public view
+    const properties = await Property.find({ status: "listed" }).populate(
       "ownerId",
       "name email phoneNumber"
     );
@@ -86,10 +79,10 @@ exports.getProperties = async (req, res) => {
   }
 };
 
-// Fetch properties created by logged-in admin
+// Fetch properties created by logged-in admin (for Dashboard)
 exports.getMyProperties = async (req, res) => {
   try {
-    // Make sure user is logged in
+    // Make sure user is logged in and is admin
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -97,7 +90,14 @@ exports.getMyProperties = async (req, res) => {
       });
     }
 
-    // Find properties only owned by the logged-in user
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Only admins can access this endpoint",
+      });
+    }
+
+    // Find properties only owned by the logged-in admin
     const properties = await Property.find({ ownerId: req.user._id }).populate(
       "ownerId",
       "name email phoneNumber"
@@ -108,7 +108,6 @@ exports.getMyProperties = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 // Fetch single property by ID
 exports.getPropertyById = async (req, res) => {
@@ -190,4 +189,4 @@ exports.deleteProperty = async (req, res) => {
       .status(500)
       .json({ success: false, message: "Server error", error: err.message });
   }
-};    
+};

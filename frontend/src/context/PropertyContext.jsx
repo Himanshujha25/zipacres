@@ -15,53 +15,77 @@ export const PropertyProvider = ({ children }) => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 helper for API call
-  const fetchFromAPI = useCallback(
-    async (filterByUser = false) => {
-      if (!user) return;
+  // Fetch admin's own properties (for Dashboard)
+  const fetchProperties = useCallback(async () => {
+    if (!user || user.role !== "admin") {
+      setProperties([]);
+      setLoading(false);
+      return;
+    }
 
-      try {
-        setLoading(true);
-        const res = await fetch("https://zipacres.onrender.com/api/properties", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/properties/my", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
 
-        if (!res.ok) throw new Error("Failed to fetch properties");
-        const data = await res.json();
+      if (!res.ok) throw new Error("Failed to fetch your properties");
+      const data = await res.json();
+      
+      setProperties(data.data || []);
+    } catch (err) {
+      console.error("Error fetching your properties:", err);
+      setProperties([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
-        if (filterByUser && user.role === "admin") {
-          setProperties(data.data.filter((p) => p.ownerId.email === user.email));
-        } else {
-          setProperties(data.data || []);
-        }
-      } catch (err) {
-        console.error("Error fetching properties:", err);
-        setProperties([]);
-      } finally {
-        setLoading(false);
+  // Fetch all public properties (for Properties page)
+  const fetchAllProperties = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // For all public properties, we don't need authentication
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      
+      // Add auth header if user is logged in
+      if (user?.token) {
+        headers.Authorization = `Bearer ${user.token}`;
       }
-    },
-    [user]
-  );
 
-  // 🔹 fetch only current user properties (admin filtered)
-  const fetchProperties = useCallback(() => {
-    fetchFromAPI(true);
-  }, [fetchFromAPI]);
+      const res = await fetch("http://localhost:5000/api/properties", {
+        method: "GET",
+        headers,
+      });
 
-  // 🔹 fetch all properties (no filter)
-  const fetchallProperties = useCallback(() => {
-    fetchFromAPI(false);
-  }, [fetchFromAPI]);
+      if (!res.ok) throw new Error("Failed to fetch all properties");
+      const data = await res.json();
+      
+      setProperties(data.data || []);
+    } catch (err) {
+      console.error("Error fetching all properties:", err);
+      setProperties([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
-  // ✅ Run once whenever user changes (login/logout)
+  // Auto-fetch admin's properties when user logs in (for Dashboard)
   useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
+    if (user && user.role === "admin") {
+      fetchProperties();
+    } else {
+      setProperties([]);
+      setLoading(false);
+    }
+  }, [user, fetchProperties]);
 
   const addProperty = (property) => {
     setProperties((prev) => [property, ...prev]);
@@ -83,8 +107,8 @@ export const PropertyProvider = ({ children }) => {
         properties,
         loading,
         setProperties,
-        fetchProperties,
-        fetchallProperties,
+        fetchProperties,        // For Dashboard - admin's own properties
+        fetchAllProperties,     // For Properties page - all public properties
         addProperty,
         updateProperty,
         deleteProperty,

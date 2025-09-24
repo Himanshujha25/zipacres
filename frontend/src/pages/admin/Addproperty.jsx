@@ -24,8 +24,7 @@ export default function AddProperty() {
   });
 
   const [uploadMode, setUploadMode] = useState({ cover: 'url', gallery: ['url', 'url', 'url', 'url', 'url'] });
-const [loading, setLoading] = useState(false);
-
+  const [loading, setLoading] = useState(false);
 
   const handleGalleryChange = (index, value) => {
     const updatedGallery = [...form.gallery];
@@ -61,45 +60,66 @@ const [loading, setLoading] = useState(false);
     }
   };
 
+  // Helper function to convert area to square feet
+  const convertToSqFt = (area, unit) => {
+    switch (unit) {
+      case 'sqft':
+        return area;
+      case 'sqyd':
+        return area * 9; // 1 square yard = 9 square feet
+      case 'gaj':
+        return area * 9; // 1 gaj = 9 square feet
+      default:
+        return area;
+    }
+  };
+
   const submit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!user?.token) {
-    alert("You must be logged in to add a property!");
-    return;
-  }
-
-  setLoading(true); // start loading
-
-  try {
-    const res = await fetch("https://zipacres.onrender.com/api/properties", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${user?.token || ""}`
-      },
-      credentials: 'include',
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to add property");
+    if (!user?.token) {
+      alert("You must be logged in to add a property!");
+      return;
     }
 
-    addProperty(data.property);
+    setLoading(true); // start loading
 
-    alert("Property added successfully!");
-    navigate(-1);
-  } catch (err) {
-    console.error(err);
-    alert("Failed to add property: " + err.message);
-  } finally {
-    setLoading(false); // stop loading
-  }
-};
+    try {
+      // Convert area to square feet before sending
+      const formToSend = {
+        ...form,
+        areaSqft: convertToSqFt(form.areaSqft, form.areaUnit)
+        // Don't send areaUnit since backend doesn't expect it
+      };
+      delete formToSend.areaUnit;
 
+      const res = await fetch("http://localhost:5000/api/properties", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.token || ""}`
+        },
+        credentials: 'include',
+        body: JSON.stringify(formToSend),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to add property");
+      }
+
+      addProperty(data.property);
+
+      alert("Property added successfully!");
+      navigate(-1);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add property: " + err.message);
+    } finally {
+      setLoading(false); // stop loading
+    }
+  };
 
   const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors bg-white";
   const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
@@ -271,7 +291,6 @@ const [loading, setLoading] = useState(false);
                 </div>
               </div>
 
-
               {/* Gallery Images */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -355,7 +374,6 @@ const [loading, setLoading] = useState(false);
               </div>
             </div>
 
-
             {/* Description */}
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
               <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
@@ -379,9 +397,7 @@ const [loading, setLoading] = useState(false);
               >
                 {loading ? 'Submitting...' : 'Submit'}
               </button>
-
             </div>
-
           </form>
         </div>
       </div>
