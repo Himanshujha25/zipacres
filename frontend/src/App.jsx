@@ -44,11 +44,7 @@ const App = () => {
         {/* user */}
         <Route
         path="/properties"
-        element={
-          <ProtectedRoute roles={["user", "admin"]}>
-            <Properties />
-          </ProtectedRoute>
-        }
+        element={ <Properties />}
       />
       <Route
         path="/properties/:id"

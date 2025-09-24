@@ -65,17 +65,18 @@ exports.addProperty = async (req, res) => {
 };
 
 // Fetch ALL properties (for public view - Properties page)
+
 exports.getAllProperties = async (req, res) => {
   try {
-    // Always show only listed properties for public view
-    const properties = await Property.find({ status: "listed" }).populate(
-      "ownerId",
-      "name email phoneNumber"
-    );
+    // This query is now very fast because the 'status' field is indexed.
+    const properties = await Property.find({ status: "listed" })
+      .populate("ownerId", "name email phoneNumber") // Gets owner's info
+      .sort({ createdAt: -1 }); // Optional: Show newest properties first
 
     return res.status(200).json({ success: true, data: properties });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Error fetching properties:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 

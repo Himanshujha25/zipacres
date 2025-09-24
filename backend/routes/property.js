@@ -6,7 +6,7 @@ const { protect, adminOnly } = require("../middleware/auth");
 // Routes
 // 🟢 Any logged-in user can view properties
 router.get('/my', protect, propertyController.getMyProperties);
-router.get("/", protect, propertyController.getAllProperties);
+router.get("/",  propertyController.getAllProperties);
 router.get("/:id", protect, propertyController.getPropertyById);
 
 // 🔴 Only admins can add/update/delete

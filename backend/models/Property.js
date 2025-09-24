@@ -29,7 +29,8 @@ const propertySchema = new mongoose.Schema({
   status: { 
     type: String, 
     enum: ["listed", "unlisted"], 
-    default: "listed" 
+    default: "listed",
+      index: true,    
   },
   createdAt: { type: Date, default: Date.now }
 });

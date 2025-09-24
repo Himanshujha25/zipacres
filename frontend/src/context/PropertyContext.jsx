@@ -51,9 +51,6 @@ export const PropertyProvider = ({ children }) => {
       const headers = {
         "Content-Type": "application/json",
       };
-      if (user?.token) {
-        headers.Authorization = `Bearer ${user.token}`;
-      }
 
       const res = await fetch("https://zipacres.onrender.com/api/properties", {
         method: "GET",
@@ -71,7 +68,7 @@ export const PropertyProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   // CHANGED: This useEffect is now simplified to meet your requirement.
   // It always fetches all properties for any user.
