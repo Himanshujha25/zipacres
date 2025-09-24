@@ -888,10 +888,10 @@ export default function Home() {
                 Send us your requirements anytime
               </p>
               <a
-                href="mailto:info@zipacres.com"
+                href="mailto:Om.mehtatso@gmail.com"
                 className="text-green-800 font-semibold hover:text-green-900 transition-colors"
               >
-                info@zipacres.com
+                Om.mehtatso@gmail.com
               </a>
             </motion.div>
             <motion.div
