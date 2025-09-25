@@ -6,7 +6,7 @@ const { OAuth2Client } = require("google-auth-library");
 
 const JWT_SECRET = process.env.JWT_SECRET || "ZIPCARE";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
-const ADMIN_CODE = process.env.ADMIN_CODE || "12345";
+const ADMIN_CODE = process.env.ADMIN_CODE || "ramRamram@zip@zip@acres";
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
