@@ -106,7 +106,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center text-gray-400">
                 <MailIcon />
-                <span className="ml-3">Om.mehtatso@gmail.com</span>
+                <span className="ml-3">contact@zipacres.com</span>  
               </div>
             </div>
             <div className="flex space-x-4">
