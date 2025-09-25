@@ -257,13 +257,13 @@ setTimeout(() => navigate("/login"), 2000);
     required
     disabled={isOtpSent} // disable after sending OTP
   />
-  <button
+  {/* <button
     type="button"
     onClick={handleSendOtp}
     className="ml-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
   >
     {isOtpSent ? "Resend OTP" : "Send OTP"}
-  </button>
+  </button> */}
 </div>
 
   {/* otp input */}
