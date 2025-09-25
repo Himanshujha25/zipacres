@@ -619,15 +619,16 @@ export default function Home() {
                 </motion.div>
 
               ))}
-              <div className="col-span-1 md:col-span-2 lg:col-span-4  mt-4">
+              <div className="col-span-1 md:col-span-2 lg:col-span-4 mt-4">
                 <div className="flex items-center justify-center">
-                  <Link href="/properties">
-                    <button className="inline-block bg-blue-900 text-white font-semibold py-3 px-8 text-lg rounded-full hover:bg-blue-800 transition-all duration-300 shadow-xl transform hover:scale-105">
+               
+                    <a href="/properties" className="inline-block bg-blue-900 text-white font-semibold py-3 px-8 text-lg rounded-full hover:bg-blue-800 transition-all duration-300 shadow-xl transform hover:scale-105">
                       View All Locations
-                    </button>
-                  </Link>
+                    </a>
+                 
                 </div>
               </div>
+
 
 
             </motion.div>
