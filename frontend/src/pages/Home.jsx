@@ -304,11 +304,16 @@ export default function Home() {
     },
     {
       id: 2,
-      name: "Rashika Jha",
+      name: "  Vikash Kumar",
       image: "/images/rel2.jpeg",
       location: "Noida",
     },
-    { id: 3, name: "Vikash Kumar", image: "/images/rel3.jpeg", location: "Meerut" },
+    {
+      id: 3,
+      name: "  Rashika Jha",
+      image: "/images/rel3.jpeg",
+      location: "Meerut",
+    },
     {
       id: 4,
       name: "Sarah Sha",
