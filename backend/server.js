@@ -15,10 +15,18 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // CORS setup
 
 app.use(cors({
-  origin: ["https://zipacres.vercel.app", "http://localhost:5173","https://zipacres.in/", "https://www.zipacres.in/","https://zipacres.com","https://www.zipacres.com"],
+  origin: [
+    "https://zipacres.vercel.app",
+    "http://localhost:5173",
+    "https://zipacres.in",
+    "https://www.zipacres.in",
+    "https://zipacres.com",
+    "https://www.zipacres.com"
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true
 }));
+
 
 
 
