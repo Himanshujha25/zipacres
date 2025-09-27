@@ -213,7 +213,7 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 hidden md:table-cell">{p.type}</td>
-                      <td className="px-6 py-4 font-semibold text-green-800">{p.price}</td>
+                      <td className="px-6 py-4 font-semibold text-green-800">₹ {p.price}</td>
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => setEditingProperty(p)}
